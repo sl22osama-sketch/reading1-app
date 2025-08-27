@@ -1,0 +1,1090 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>برنامج تسجيل القراءة التفاعلي</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700;800;900&family=Tajawal:wght@300;400;500;700;800;900&display=swap');
+        
+        * {
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Cairo', 'Tajawal', sans-serif;
+            background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 50%, #ffffff 100%);
+            min-height: 100vh;
+            position: relative;
+            overflow-x: hidden;
+        }
+        
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: 
+                radial-gradient(circle at 20% 80%, rgba(33, 150, 243, 0.08) 0%, transparent 50%),
+                radial-gradient(circle at 80% 20%, rgba(156, 39, 176, 0.08) 0%, transparent 50%),
+                radial-gradient(circle at 40% 40%, rgba(103, 58, 183, 0.06) 0%, transparent 50%),
+                radial-gradient(circle at 60% 60%, rgba(255, 193, 7, 0.05) 0%, transparent 50%);
+            pointer-events: none;
+            z-index: -1;
+        }
+        
+        .glass-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border: 2px solid rgba(255, 255, 255, 0.95);
+            box-shadow: 0 8px 25px 0 rgba(0, 0, 0, 0.08);
+        }
+        
+        .glass-card-dark {
+            background: rgba(255, 255, 255, 0.92);
+            backdrop-filter: blur(8px);
+            border: 2px solid rgba(255, 255, 255, 0.9);
+            box-shadow: 0 4px 20px 0 rgba(0, 0, 0, 0.06);
+        }
+        
+        .reading-text {
+            line-height: 2.5;
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: #1a1a1a;
+            text-shadow: none;
+        }
+        
+        .timer-circle {
+            stroke-dasharray: 283;
+            stroke-dashoffset: 283;
+            transition: stroke-dashoffset 1s linear;
+            filter: drop-shadow(0 0 8px rgba(59, 130, 246, 0.5));
+        }
+        
+        .timer-container {
+            background: linear-gradient(145deg, rgba(255, 255, 255, 0.3), rgba(255, 255, 255, 0.1));
+            backdrop-filter: blur(20px);
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            box-shadow: 
+                0 8px 32px rgba(0, 0, 0, 0.1),
+                inset 0 1px 0 rgba(255, 255, 255, 0.4);
+        }
+        
+        .btn-gradient {
+            background: linear-gradient(145deg, #1976d2, #7b1fa2);
+            border: none;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s ease;
+            box-shadow: 0 6px 20px rgba(25, 118, 210, 0.4);
+            font-weight: 600;
+        }
+        
+        .btn-gradient:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 30px rgba(25, 118, 210, 0.6);
+        }
+        
+        .btn-gradient::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+            transition: left 0.5s;
+        }
+        
+        .btn-gradient:hover::before {
+            left: 100%;
+        }
+        
+        .btn-success {
+            background: linear-gradient(145deg, #10b981, #059669);
+            box-shadow: 0 4px 15px rgba(16, 185, 129, 0.4);
+        }
+        
+        .btn-success:hover {
+            box-shadow: 0 8px 25px rgba(16, 185, 129, 0.6);
+        }
+        
+        .btn-warning {
+            background: linear-gradient(145deg, #f59e0b, #d97706);
+            box-shadow: 0 4px 15px rgba(245, 158, 11, 0.4);
+        }
+        
+        .btn-warning:hover {
+            box-shadow: 0 8px 25px rgba(245, 158, 11, 0.6);
+        }
+        
+        .btn-danger {
+            background: linear-gradient(145deg, #ef4444, #dc2626);
+            box-shadow: 0 4px 15px rgba(239, 68, 68, 0.4);
+        }
+        
+        .btn-danger:hover {
+            box-shadow: 0 8px 25px rgba(239, 68, 68, 0.6);
+        }
+        
+        .pulse {
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { 
+                transform: scale(1);
+                box-shadow: 0 0 0 0 rgba(102, 126, 234, 0.7);
+            }
+            50% { 
+                transform: scale(1.05);
+                box-shadow: 0 0 0 10px rgba(102, 126, 234, 0);
+            }
+        }
+        
+        .celebration {
+            animation: celebration 0.8s ease-out;
+        }
+        
+        @keyframes celebration {
+            0% { transform: scale(1) rotate(0deg); }
+            25% { transform: scale(1.1) rotate(-5deg); }
+            50% { transform: scale(1.2) rotate(5deg); }
+            75% { transform: scale(1.1) rotate(-2deg); }
+            100% { transform: scale(1) rotate(0deg); }
+        }
+        
+        .float-animation {
+            animation: float 6s ease-in-out infinite;
+        }
+        
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+        }
+        
+        .slide-in {
+            animation: slideIn 0.5s ease-out;
+        }
+        
+        @keyframes slideIn {
+            from { 
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to { 
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .glow {
+            box-shadow: 0 0 20px rgba(102, 126, 234, 0.6);
+        }
+        
+        .stat-card {
+            background: linear-gradient(145deg, rgba(255, 255, 255, 0.2), rgba(255, 255, 255, 0.05));
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            transition: all 0.3s ease;
+        }
+        
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        }
+        
+        .record-card {
+            background: linear-gradient(145deg, rgba(255, 255, 255, 0.15), rgba(255, 255, 255, 0.05));
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            transition: all 0.3s ease;
+        }
+        
+        .record-card:hover {
+            transform: translateX(5px);
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.15);
+        }
+        
+        .level-indicator {
+            transition: all 0.3s ease;
+            position: relative;
+        }
+        
+        .level-indicator::after {
+            content: '';
+            position: absolute;
+            top: -2px;
+            left: -2px;
+            right: -2px;
+            bottom: -2px;
+            background: linear-gradient(45deg, #667eea, #764ba2, #667eea);
+            border-radius: 50%;
+            z-index: -1;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        
+        .level-indicator.active::after {
+            opacity: 1;
+            animation: rotate 2s linear infinite;
+        }
+        
+        @keyframes rotate {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        
+        .text-gradient {
+            background: linear-gradient(135deg, #1565c0 0%, #7b1fa2 50%, #c2185b 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            font-weight: 800;
+        }
+        
+        .sparkle {
+            position: relative;
+        }
+        
+        .sparkle::before {
+            content: '✨';
+            position: absolute;
+            top: -10px;
+            right: -10px;
+            animation: sparkle 2s ease-in-out infinite;
+        }
+        
+        @keyframes sparkle {
+            0%, 100% { opacity: 0; transform: scale(0.5) rotate(0deg); }
+            50% { opacity: 1; transform: scale(1) rotate(180deg); }
+        }
+        
+        .progress-bar {
+            background: linear-gradient(90deg, #667eea, #764ba2);
+            height: 6px;
+            border-radius: 3px;
+            transition: width 0.3s ease;
+            box-shadow: 0 2px 10px rgba(102, 126, 234, 0.4);
+        }
+        
+        .help-tip {
+            background: linear-gradient(145deg, rgba(16, 185, 129, 0.2), rgba(16, 185, 129, 0.05));
+            border-left: 4px solid #10b981;
+        }
+        
+        .scrollbar-hide {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+        
+        .scrollbar-hide::-webkit-scrollbar {
+            display: none;
+        }
+    </style>
+</head>
+<body class="min-h-screen p-4">
+    <div class="max-w-6xl mx-auto relative z-10">
+        <!-- Header -->
+        <div class="text-center mb-12 float-animation">
+            <div class="inline-block sparkle">
+                <h1 class="text-5xl md:text-6xl font-bold text-gradient mb-4 drop-shadow-lg">
+                    📚 برنامج تسجيل القراءة التفاعلي
+                </h1>
+            </div>
+            <p class="text-black text-lg md:text-xl font-semibold">
+                تحدي القراءة المتدرج - من دقيقتين إلى نصف دقيقة! ✨
+            </p>
+            <div class="mt-4 w-32 h-1 bg-gradient-to-r from-transparent via-gray-400 to-transparent mx-auto opacity-60"></div>
+        </div>
+
+        <!-- Student Name Section -->
+        <div class="glass-card rounded-2xl p-8 mb-8 slide-in">
+            <h2 class="text-2xl font-bold text-black mb-6 text-center">👤 معلومات الطالب</h2>
+            <div class="max-w-md mx-auto">
+                <div class="mb-4">
+                    <label for="studentName" class="block text-black font-bold mb-3 text-lg">اسم الطالب *</label>
+                    <input 
+                        type="text" 
+                        id="studentName" 
+                        placeholder="أدخل اسم الطالب هنا..." 
+                        class="w-full px-6 py-4 rounded-xl bg-white/90 backdrop-blur-sm border-2 border-blue-300 text-gray-800 placeholder-gray-500 font-medium text-lg focus:outline-none focus:border-blue-500 focus:bg-white transition-all duration-300"
+                        required
+                    >
+                </div>
+                <div id="nameError" class="text-red-700 text-sm font-medium hidden bg-red-100 p-3 rounded-lg border border-red-300">
+                    ⚠️ يرجى إدخال اسم الطالب قبل البدء في القراءة
+                </div>
+                <div id="nameSuccess" class="text-green-700 text-sm font-medium hidden bg-green-100 p-3 rounded-lg border border-green-300">
+                    ✅ مرحباً <span id="welcomeName"></span>! يمكنك الآن البدء في القراءة
+                </div>
+            </div>
+        </div>
+
+        <!-- Progress Tracker -->
+        <div class="glass-card rounded-2xl p-8 mb-8 slide-in">
+            <h2 class="text-2xl font-bold text-black mb-6 text-center">🎯 مستوى التقدم</h2>
+            <div class="flex justify-center items-center mb-6">
+                <div class="flex items-center space-x-4 space-x-reverse">
+                    <div id="level1" class="level-indicator w-16 h-16 rounded-full bg-gradient-to-br from-yellow-400 to-orange-500 flex items-center justify-center text-white font-bold text-xl shadow-lg active">1</div>
+                    <div class="w-12 h-2 bg-gradient-to-r from-yellow-400 to-gray-300 rounded-full"></div>
+                    <div id="level2" class="level-indicator w-16 h-16 rounded-full bg-gray-400 flex items-center justify-center text-gray-600 font-bold text-xl shadow-lg">2</div>
+                    <div class="w-12 h-2 bg-gray-300 rounded-full"></div>
+                    <div id="level3" class="level-indicator w-16 h-16 rounded-full bg-gray-400 flex items-center justify-center text-gray-600 font-bold text-xl shadow-lg">3</div>
+                </div>
+            </div>
+            <div class="text-center">
+                <div id="currentLevel" class="text-xl font-bold text-black mb-2">المستوى الأول: دقيقتان</div>
+                <div class="text-gray-700 text-sm font-semibold">
+                    <span id="levelDescription">اقرأ الفقرة في دقيقتين أو أقل</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Timer Section -->
+        <div class="glass-card rounded-2xl p-8 mb-8 slide-in">
+            <div class="flex justify-center items-center mb-8">
+                <div class="timer-container rounded-full p-6">
+                    <div class="relative">
+                        <svg class="w-40 h-40 transform -rotate-90">
+                            <circle cx="80" cy="80" r="60" stroke="rgba(255,255,255,0.2)" stroke-width="8" fill="none"></circle>
+                            <circle id="timerCircle" cx="80" cy="80" r="60" stroke="url(#gradient)" stroke-width="8" fill="none" class="timer-circle"></circle>
+                            <defs>
+                                <linearGradient id="gradient" x1="0%" y1="0%" x2="100%" y2="0%">
+                                    <stop offset="0%" style="stop-color:#667eea;stop-opacity:1" />
+                                    <stop offset="100%" style="stop-color:#764ba2;stop-opacity:1" />
+                                </linearGradient>
+                            </defs>
+                        </svg>
+                        <div class="absolute inset-0 flex items-center justify-center">
+                            <div class="text-center">
+                                <div id="timeDisplay" class="text-4xl font-bold text-black drop-shadow-lg">2:00</div>
+                                <div class="text-sm text-gray-700 font-semibold">دقيقة</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="flex flex-wrap justify-center gap-4">
+                <button id="startBtn" class="btn-gradient btn-success text-white px-8 py-4 rounded-xl font-bold text-lg shadow-lg">
+                    🚀 ابدأ القراءة
+                </button>
+                <button id="pauseBtn" class="btn-gradient btn-warning text-white px-8 py-4 rounded-xl font-bold text-lg shadow-lg hidden">
+                    ⏸️ توقف
+                </button>
+                <button id="finishBtn" class="btn-gradient text-white px-8 py-4 rounded-xl font-bold text-lg shadow-lg hidden">
+                    ✅ انتهيت من القراءة
+                </button>
+                <button id="resetBtn" class="btn-gradient bg-gradient-to-r from-gray-500 to-gray-600 text-white px-8 py-4 rounded-xl font-bold text-lg shadow-lg">
+                    🔄 إعادة تعيين
+                </button>
+            </div>
+        </div>
+
+        <!-- Reading Text -->
+        <div class="glass-card rounded-2xl p-8 mb-8 slide-in">
+            <h3 class="text-2xl font-bold text-black mb-6 text-center">📖 النص للقراءة</h3>
+            <div class="bg-white/95 backdrop-blur-sm border-2 border-gray-200 rounded-xl p-6 shadow-lg">
+                <div class="reading-text leading-relaxed">
+                <p class="mb-4">
+                    تُعَدُّ التِّكْنُولُوجِيَا الحَدِيثَةُ مِنْ أَهَمِّ العَوَامِلِ المُؤَثِّرَةِ فِي تَطَوُّرِ المُجْتَمَعَاتِ المُعَاصِرَةِ، حَيْثُ أَحْدَثَتْ ثَوْرَةً حَقِيقِيَّةً فِي جَمِيعِ مَجَالَاتِ الحَيَاةِ. فَقَدْ غَيَّرَتْ طَرِيقَةَ تَفْكِيرِنَا وَتَعَامُلِنَا مَعَ المَعْلُومَاتِ، وَأَصْبَحَتْ جُزْءَاً لَا يَتَجَزَّأُ مِنْ حَيَاتِنَا اليَوْمِيَّةِ. وَمِنْ أَبْرَزِ تَطْبِيقَاتِهَا الذَّكَاءُ الاصْطِنَاعِيُّ الَّذِي يُحَاكِي قُدْرَاتِ العَقْلِ البَشَرِيِّ فِي التَّعَلُّمِ وَالاسْتِنْتَاجِ.
+                </p>
+                <p class="mb-4">
+                    وَلَقَدْ أَسْهَمَتِ الثَّوْرَةُ الرَّقْمِيَّةُ فِي تَسْهِيلِ عَمَلِيَّاتِ التَّوَاصُلِ بَيْنَ الشُّعُوبِ، وَكَسَرَتْ حَوَاجِزَ المَسَافَاتِ الجُغْرَافِيَّةِ، مِمَّا أَدَّى إِلَى نَشْأَةِ مَا يُسَمَّى بِالقَرْيَةِ الكَوْنِيَّةِ. كَمَا سَاعَدَتْ فِي تَطْوِيرِ أَسَالِيبِ التَّعْلِيمِ وَالطِّبِّ وَالصِّنَاعَةِ، وَفَتَحَتْ آفَاقَاً جَدِيدَةً لِلإِبْدَاعِ وَالابْتِكَارِ. غَيْرَ أَنَّ هَذَا التَّقَدُّمَ المُتَسَارِعَ يَتَطَلَّبُ مِنَّا مُوَاكَبَةً مُسْتَمِرَّةً وَتَطْوِيرَاً لِمَهَارَاتِنَا لِنَكُونَ قَادِرِينَ عَلَى التَّكَيُّفِ مَعَ مُتَطَلَّبَاتِ العَصْرِ.
+                </p>
+                <p>
+                    وَفِي ظِلِّ هَذِهِ التَّطَوُّرَاتِ المُتَلَاحِقَةِ، يَجِبُ عَلَيْنَا أَنْ نَسْتَثْمِرَ التِّكْنُولُوجِيَا بِحِكْمَةٍ وَوَعْيٍ، وَأَنْ نُحَافِظَ عَلَى قِيَمِنَا الإِنْسَانِيَّةِ وَهُوِيَّتِنَا الثَّقَافِيَّةِ. فَالتَّوَازُنُ بَيْنَ الاسْتِفَادَةِ مِنْ مُنْجَزَاتِ العِلْمِ وَالحِفَاظِ عَلَى أُصُولِنَا هُوَ السَّبِيلُ الأَمْثَلُ لِبِنَاءِ مُسْتَقْبَلٍ مُشْرِقٍ يَجْمَعُ بَيْنَ التَّقَدُّمِ وَالأَصَالَةِ.
+                </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Help Section -->
+        <div class="glass-card rounded-2xl p-8 mb-8 slide-in">
+            <h3 class="text-2xl font-bold text-black mb-6 text-center">🆘 مساعدة للطلاب</h3>
+            <div id="helpSection" class="hidden">
+                <div class="grid md:grid-cols-2 gap-6 mb-6">
+                    <div class="help-tip p-6 rounded-xl backdrop-blur-sm">
+                        <h4 class="font-bold text-black mb-4 text-lg">💡 نصائح للقراءة السريعة</h4>
+                        <ul class="text-gray-800 space-y-2">
+                            <li class="flex items-center"><span class="text-green-600 mr-2">✓</span> اقرأ بعينيك وليس بصوت عالٍ</li>
+                            <li class="flex items-center"><span class="text-green-600 mr-2">✓</span> ركز على الكلمات المهمة</li>
+                            <li class="flex items-center"><span class="text-green-600 mr-2">✓</span> لا تتوقف عند كل كلمة</li>
+                            <li class="flex items-center"><span class="text-green-600 mr-2">✓</span> تدرب على القراءة يومياً</li>
+                        </ul>
+                    </div>
+                    <div class="help-tip p-6 rounded-xl backdrop-blur-sm">
+                        <h4 class="font-bold text-black mb-4 text-lg">🎯 تقنيات التركيز</h4>
+                        <ul class="text-gray-800 space-y-2">
+                            <li class="flex items-center"><span class="text-blue-600 mr-2">◆</span> خذ نفساً عميقاً قبل البدء</li>
+                            <li class="flex items-center"><span class="text-blue-600 mr-2">◆</span> اجلس في مكان هادئ</li>
+                            <li class="flex items-center"><span class="text-blue-600 mr-2">◆</span> ضع إصبعك تحت السطر</li>
+                            <li class="flex items-center"><span class="text-blue-600 mr-2">◆</span> لا تقلق من الأخطاء</li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="glass-card-dark p-6 rounded-xl text-center">
+                    <h4 class="font-bold text-yellow-700 mb-3 text-lg">🌟 تذكر</h4>
+                    <p class="text-gray-800 font-medium">القراءة مهارة تحتاج للتدريب. كل محاولة تجعلك أفضل من السابقة! 💪</p>
+                </div>
+            </div>
+            <div class="text-center">
+                <button id="helpBtn" class="btn-gradient text-white px-6 py-3 rounded-xl font-bold shadow-lg">
+                    📋 إظهار النصائح
+                </button>
+            </div>
+        </div>
+
+        <!-- Results Section -->
+        <div id="resultsSection" class="glass-card rounded-2xl p-8 mb-8 hidden slide-in">
+            <h3 class="text-2xl font-bold text-black mb-6 text-center">🏆 النتائج</h3>
+            <div id="resultContent" class="text-center">
+                <!-- Results will be displayed here -->
+            </div>
+        </div>
+
+        <!-- Reading Records Section -->
+        <div class="glass-card rounded-2xl p-8 mb-8 slide-in">
+            <div class="flex flex-col md:flex-row justify-between items-center mb-8 gap-4">
+                <h3 class="text-2xl font-bold text-black">📊 سجل القراءات</h3>
+                <div class="flex space-x-3 space-x-reverse">
+                    <button id="clearRecordsBtn" class="btn-gradient btn-danger text-white px-6 py-3 rounded-xl font-bold shadow-lg">
+                        🗑️ مسح السجل
+                    </button>
+                    <button id="exportRecordsBtn" class="btn-gradient btn-success text-white px-6 py-3 rounded-xl font-bold shadow-lg">
+                        📥 تصدير Excel
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Statistics Summary -->
+            <div id="statisticsSection" class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+                <div class="stat-card p-6 rounded-xl text-center">
+                    <div class="text-3xl font-bold text-blue-600 mb-2" id="totalReadings">0</div>
+                    <div class="text-sm text-black font-semibold">إجمالي القراءات</div>
+                </div>
+                <div class="stat-card p-6 rounded-xl text-center">
+                    <div class="text-3xl font-bold text-green-600 mb-2" id="successfulReadings">0</div>
+                    <div class="text-sm text-black font-semibold">قراءات ناجحة</div>
+                </div>
+                <div class="stat-card p-6 rounded-xl text-center">
+                    <div class="text-3xl font-bold text-orange-600 mb-2" id="averageTime">0:00</div>
+                    <div class="text-sm text-black font-semibold">متوسط الوقت</div>
+                </div>
+                <div class="stat-card p-6 rounded-xl text-center">
+                    <div class="text-3xl font-bold text-purple-600 mb-2" id="bestTime">--</div>
+                    <div class="text-sm text-black font-semibold">أفضل وقت</div>
+                </div>
+            </div>
+
+            <!-- Records List -->
+            <div id="recordsList" class="space-y-4 max-h-96 overflow-y-auto scrollbar-hide">
+                <div class="text-center text-gray-600 py-12">
+                    <div class="text-6xl mb-4">📚</div>
+                    <p class="text-lg">لا توجد تسجيلات بعد</p>
+                    <p class="text-sm">ابدأ القراءة لحفظ أول تسجيل!</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        class ReadingTracker {
+            constructor() {
+                this.currentLevel = 1;
+                this.timeTargets = [120, 60, 30]; // 2 minutes, 1 minute, 30 seconds
+                this.currentTime = this.timeTargets[0];
+                this.isRunning = false;
+                this.isPaused = false;
+                this.timer = null;
+                this.totalTime = this.timeTargets[0];
+                this.startTime = null;
+                this.endTime = null;
+                this.actualReadingTime = 0;
+                this.readingRecords = this.loadRecords();
+                
+                this.initializeElements();
+                this.bindEvents();
+                this.updateDisplay();
+                this.updateStatistics();
+                this.displayRecords();
+            }
+            
+            initializeElements() {
+                this.startBtn = document.getElementById('startBtn');
+                this.pauseBtn = document.getElementById('pauseBtn');
+                this.finishBtn = document.getElementById('finishBtn');
+                this.resetBtn = document.getElementById('resetBtn');
+                this.timeDisplay = document.getElementById('timeDisplay');
+                this.timerCircle = document.getElementById('timerCircle');
+                this.helpBtn = document.getElementById('helpBtn');
+                this.helpSection = document.getElementById('helpSection');
+                this.resultsSection = document.getElementById('resultsSection');
+                this.resultContent = document.getElementById('resultContent');
+                this.currentLevelDisplay = document.getElementById('currentLevel');
+                this.levelDescription = document.getElementById('levelDescription');
+                
+                // Records elements
+                this.recordsList = document.getElementById('recordsList');
+                this.clearRecordsBtn = document.getElementById('clearRecordsBtn');
+                this.exportRecordsBtn = document.getElementById('exportRecordsBtn');
+                this.totalReadingsEl = document.getElementById('totalReadings');
+                this.successfulReadingsEl = document.getElementById('successfulReadings');
+                this.averageTimeEl = document.getElementById('averageTime');
+                this.bestTimeEl = document.getElementById('bestTime');
+            }
+            
+            bindEvents() {
+                this.startBtn.addEventListener('click', () => this.startTimer());
+                this.pauseBtn.addEventListener('click', () => this.pauseTimer());
+                this.finishBtn.addEventListener('click', () => this.finishReading());
+                this.resetBtn.addEventListener('click', () => this.resetTimer());
+                this.helpBtn.addEventListener('click', () => this.toggleHelp());
+                this.clearRecordsBtn.addEventListener('click', () => this.clearRecords());
+                this.exportRecordsBtn.addEventListener('click', () => this.exportRecords());
+            }
+            
+            startTimer() {
+                const studentName = document.getElementById('studentName').value.trim();
+                const nameError = document.getElementById('nameError');
+                const nameSuccess = document.getElementById('nameSuccess');
+                const welcomeName = document.getElementById('welcomeName');
+                
+                if (!studentName) {
+                    nameError.classList.remove('hidden');
+                    nameSuccess.classList.add('hidden');
+                    document.getElementById('studentName').focus();
+                    document.getElementById('studentName').classList.add('border-red-400', 'bg-red-500/20');
+                    setTimeout(() => {
+                        document.getElementById('studentName').classList.remove('border-red-400', 'bg-red-500/20');
+                    }, 3000);
+                    return;
+                }
+                
+                nameError.classList.add('hidden');
+                nameSuccess.classList.remove('hidden');
+                welcomeName.textContent = studentName;
+                
+                if (!this.isRunning) {
+                    this.isRunning = true;
+                    this.startTime = Date.now();
+                    this.startBtn.classList.add('hidden');
+                    this.pauseBtn.classList.remove('hidden');
+                    this.finishBtn.classList.remove('hidden');
+                    
+                    this.timer = setInterval(() => {
+                        if (this.currentTime > 0) {
+                            this.currentTime--;
+                            this.updateDisplay();
+                        } else {
+                            this.timeUp();
+                        }
+                    }, 1000);
+                }
+            }
+            
+            pauseTimer() {
+                if (this.isRunning) {
+                    this.isRunning = false;
+                    clearInterval(this.timer);
+                    this.startBtn.classList.remove('hidden');
+                    this.pauseBtn.classList.add('hidden');
+                    this.finishBtn.classList.add('hidden');
+                    this.startBtn.textContent = '▶️ متابعة';
+                }
+            }
+            
+            finishReading() {
+                if (this.isRunning) {
+                    this.endTime = Date.now();
+                    this.actualReadingTime = Math.floor((this.endTime - this.startTime) / 1000);
+                    this.isRunning = false;
+                    clearInterval(this.timer);
+                    this.saveRecord(true, this.actualReadingTime);
+                    this.showResults(true, this.actualReadingTime);
+                    this.advanceLevel();
+                }
+            }
+            
+            timeUp() {
+                this.endTime = Date.now();
+                this.actualReadingTime = Math.floor((this.endTime - this.startTime) / 1000);
+                this.isRunning = false;
+                clearInterval(this.timer);
+                this.saveRecord(false, this.actualReadingTime);
+                this.showResults(false, this.actualReadingTime);
+            }
+            
+            resetTimer() {
+                this.isRunning = false;
+                this.isPaused = false;
+                clearInterval(this.timer);
+                this.currentTime = this.timeTargets[this.currentLevel - 1];
+                this.totalTime = this.timeTargets[this.currentLevel - 1];
+                this.startTime = null;
+                this.endTime = null;
+                this.actualReadingTime = 0;
+                this.startBtn.classList.remove('hidden');
+                this.pauseBtn.classList.add('hidden');
+                this.finishBtn.classList.add('hidden');
+                this.startBtn.textContent = '🚀 ابدأ القراءة';
+                this.resultsSection.classList.add('hidden');
+                this.updateDisplay();
+            }
+            
+            showResults(success, actualTime) {
+                this.resultsSection.classList.remove('hidden');
+                
+                const targetTime = this.timeTargets[this.currentLevel - 1];
+                const timeDifference = actualTime - targetTime;
+                const minutes = Math.floor(actualTime / 60);
+                const seconds = actualTime % 60;
+                const timeString = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+                
+                let timingMessage = '';
+                let timingClass = '';
+                
+                if (success) {
+                    if (timeDifference < 0) {
+                        const savedMinutes = Math.floor(Math.abs(timeDifference) / 60);
+                        const savedSeconds = Math.abs(timeDifference) % 60;
+                        const savedTimeString = savedMinutes > 0 ? 
+                            `${savedMinutes} دقيقة و ${savedSeconds} ثانية` : 
+                            `${savedSeconds} ثانية`;
+                        timingMessage = `⚡ ممتاز! وفرت ${savedTimeString} من الوقت المحدد`;
+                        timingClass = 'text-blue-600 bg-blue-50';
+                    } else if (timeDifference === 0) {
+                        timingMessage = `🎯 مثالي! أكملت القراءة في الوقت المحدد تماماً`;
+                        timingClass = 'text-green-600 bg-green-50';
+                    } else {
+                        timingMessage = `✅ أحسنت! أكملت القراءة بنجاح`;
+                        timingClass = 'text-green-600 bg-green-50';
+                    }
+                    
+                    this.resultContent.innerHTML = `
+                        <div class="celebration">
+                            <div class="text-8xl mb-6">🎉</div>
+                            <h4 class="text-4xl font-bold text-black mb-4">أحسنت!</h4>
+                            <p class="text-black mb-6 text-lg font-semibold">لقد أكملت القراءة بنجاح!</p>
+                            <div class="grid md:grid-cols-2 gap-6 mb-6">
+                                <div class="glass-card-dark p-6 rounded-xl">
+                                    <h5 class="font-bold text-black mb-4 text-lg">📊 تفاصيل الأداء</h5>
+                                    <p class="text-black mb-2 font-semibold">الوقت المستغرق: <span class="font-bold text-blue-600">${timeString}</span></p>
+                                    <p class="text-black font-semibold">الوقت المحدد: <span class="font-bold text-orange-600">${Math.floor(targetTime/60)}:${(targetTime%60).toString().padStart(2, '0')}</span></p>
+                                </div>
+                                <div class="glass-card-dark p-6 rounded-xl border-l-4 border-green-400">
+                                    <p class="font-bold text-green-600 text-lg">${timingMessage}</p>
+                                </div>
+                            </div>
+                            <div class="glass-card-dark p-6 rounded-xl border-2 border-green-400">
+                                <p class="text-green-600 font-bold text-xl">المستوى ${this.currentLevel} مكتمل ✅</p>
+                            </div>
+                        </div>
+                    `;
+                } else {
+                    const extraMinutes = Math.floor(timeDifference / 60);
+                    const extraSeconds = timeDifference % 60;
+                    const extraTimeString = extraMinutes > 0 ? 
+                        `${extraMinutes} دقيقة و ${extraSeconds} ثانية` : 
+                        `${extraSeconds} ثانية`;
+                    
+                    this.resultContent.innerHTML = `
+                        <div class="text-6xl mb-6">⏰</div>
+                        <h4 class="text-3xl font-bold text-orange-600 mb-4">انتهى الوقت!</h4>
+                        <p class="text-black mb-6 text-lg font-semibold">لا تقلق، يمكنك المحاولة مرة أخرى</p>
+                        <div class="grid md:grid-cols-2 gap-6 mb-6">
+                            <div class="glass-card-dark p-6 rounded-xl">
+                                <h5 class="font-bold text-black mb-4 text-lg">📊 تفاصيل الأداء</h5>
+                                <p class="text-black mb-2 font-semibold">الوقت المستغرق: <span class="font-bold text-blue-600">${timeString}</span></p>
+                                <p class="text-black font-semibold">الوقت المحدد: <span class="font-bold text-orange-600">${Math.floor(targetTime/60)}:${(targetTime%60).toString().padStart(2, '0')}</span></p>
+                            </div>
+                            <div class="glass-card-dark p-6 rounded-xl border-l-4 border-red-400">
+                                <p class="text-red-600 font-bold text-lg">⏱️ تجاوزت الوقت بـ ${extraTimeString}</p>
+                            </div>
+                        </div>
+                        <div class="glass-card-dark p-6 rounded-xl border-2 border-orange-400">
+                            <p class="text-orange-600 font-bold text-xl">تذكر: التدريب يجعلك أفضل! 💪</p>
+                        </div>
+                    `;
+                }
+            }
+            
+            advanceLevel() {
+                if (this.currentLevel < 3) {
+                    setTimeout(() => {
+                        this.currentLevel++;
+                        this.currentTime = this.timeTargets[this.currentLevel - 1];
+                        this.totalTime = this.timeTargets[this.currentLevel - 1];
+                        this.updateLevelDisplay();
+                        this.updateDisplay();
+                        this.startBtn.textContent = '🚀 ابدأ المستوى التالي';
+                        this.startBtn.classList.remove('hidden');
+                        this.pauseBtn.classList.add('hidden');
+                        this.finishBtn.classList.add('hidden');
+                    }, 3000);
+                } else {
+                    setTimeout(() => {
+                        this.resultContent.innerHTML = `
+                            <div class="text-8xl mb-6 sparkle">🏆</div>
+                            <h4 class="text-5xl font-bold text-gradient mb-6">مبروك!</h4>
+                            <p class="text-black mb-8 text-xl font-bold">لقد أكملت جميع المستويات بنجاح!</p>
+                            <div class="glass-card-dark p-8 rounded-xl border-4 border-purple-400 glow">
+                                <p class="text-purple-600 font-bold text-2xl">أنت الآن قارئ ماهر! 🌟</p>
+                                <div class="mt-4 flex justify-center space-x-2">
+                                    <span class="text-2xl">🎉</span>
+                                    <span class="text-2xl">✨</span>
+                                    <span class="text-2xl">🎊</span>
+                                </div>
+                            </div>
+                        `;
+                    }, 3000);
+                }
+            }
+            
+            updateDisplay() {
+                const minutes = Math.floor(this.currentTime / 60);
+                const seconds = this.currentTime % 60;
+                this.timeDisplay.textContent = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+                
+                // Update circle progress
+                const progress = (this.totalTime - this.currentTime) / this.totalTime;
+                const circumference = 377; // Updated for larger circle (2 * π * 60)
+                const offset = circumference - (progress * circumference);
+                this.timerCircle.style.strokeDashoffset = offset;
+                
+                // Change color based on time remaining
+                if (this.currentTime <= 10) {
+                    this.timerCircle.style.stroke = '#ef4444'; // red
+                } else if (this.currentTime <= 30) {
+                    this.timerCircle.style.stroke = '#f59e0b'; // yellow
+                } else {
+                    this.timerCircle.style.stroke = '#3b82f6'; // blue
+                }
+            }
+            
+            updateLevelDisplay() {
+                const levels = ['الأول: دقيقتان', 'الثاني: دقيقة واحدة', 'الثالث: نصف دقيقة'];
+                const descriptions = [
+                    'اقرأ الفقرة في دقيقتين أو أقل',
+                    'اقرأ الفقرة في دقيقة واحدة أو أقل',
+                    'اقرأ الفقرة في نصف دقيقة أو أقل'
+                ];
+                
+                this.currentLevelDisplay.textContent = `المستوى ${levels[this.currentLevel - 1]}`;
+                this.levelDescription.textContent = descriptions[this.currentLevel - 1];
+                
+                // Update level indicators
+                for (let i = 1; i <= 3; i++) {
+                    const levelElement = document.getElementById(`level${i}`);
+                    if (i < this.currentLevel) {
+                        levelElement.className = 'level-indicator w-16 h-16 rounded-full bg-gradient-to-br from-green-400 to-green-600 flex items-center justify-center text-white font-bold text-xl shadow-lg';
+                        levelElement.innerHTML = '✓';
+                    } else if (i === this.currentLevel) {
+                        levelElement.className = 'level-indicator w-16 h-16 rounded-full bg-gradient-to-br from-yellow-400 to-orange-500 flex items-center justify-center text-white font-bold text-xl shadow-lg pulse active';
+                        levelElement.textContent = i;
+                    } else {
+                        levelElement.className = 'level-indicator w-16 h-16 rounded-full bg-gray-400 flex items-center justify-center text-gray-600 font-bold text-xl shadow-lg';
+                        levelElement.textContent = i;
+                    }
+                }
+            }
+            
+            toggleHelp() {
+                if (this.helpSection.classList.contains('hidden')) {
+                    this.helpSection.classList.remove('hidden');
+                    this.helpBtn.textContent = '❌ إخفاء النصائح';
+                } else {
+                    this.helpSection.classList.add('hidden');
+                    this.helpBtn.textContent = '📋 إظهار النصائح';
+                }
+            }
+            
+            // Records Management Functions
+            loadRecords() {
+                const saved = localStorage.getItem('readingRecords');
+                return saved ? JSON.parse(saved) : [];
+            }
+            
+            saveRecord(success, actualTime) {
+                const studentName = document.getElementById('studentName').value.trim();
+                
+                const record = {
+                    id: Date.now(),
+                    studentName: studentName,
+                    date: new Date().toLocaleDateString('ar-SA'),
+                    time: new Date().toLocaleTimeString('ar-SA', { hour12: false }),
+                    level: this.currentLevel,
+                    targetTime: this.timeTargets[this.currentLevel - 1],
+                    actualTime: actualTime,
+                    success: success,
+                    timeDifference: actualTime - this.timeTargets[this.currentLevel - 1]
+                };
+                
+                this.readingRecords.unshift(record);
+                localStorage.setItem('readingRecords', JSON.stringify(this.readingRecords));
+                this.updateStatistics();
+                this.displayRecords();
+            }
+            
+            clearRecords() {
+                if (confirm('هل أنت متأكد من حذف جميع التسجيلات؟ لا يمكن التراجع عن هذا الإجراء.')) {
+                    this.readingRecords = [];
+                    localStorage.removeItem('readingRecords');
+                    this.updateStatistics();
+                    this.displayRecords();
+                }
+            }
+            
+            exportRecords() {
+                if (this.readingRecords.length === 0) {
+                    alert('لا توجد تسجيلات للتصدير!');
+                    return;
+                }
+                
+                // Create Excel-compatible HTML table
+                let excelContent = `
+                    <html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40">
+                    <head>
+                        <meta charset="UTF-8">
+                        <meta http-equiv="content-type" content="application/vnd.ms-excel; charset=UTF-8">
+                        <style>
+                            .header { background-color: #4472C4; color: white; font-weight: bold; text-align: center; }
+                            .success { background-color: #E2EFDA; color: #70AD47; }
+                            .failed { background-color: #FCE4D6; color: #C55A11; }
+                            .center { text-align: center; }
+                            .right { text-align: right; }
+                            table { border-collapse: collapse; width: 100%; direction: rtl; }
+                            th, td { border: 1px solid #D0D7DE; padding: 8px; }
+                            .title { background-color: #2F5597; color: white; font-size: 16px; font-weight: bold; text-align: center; }
+                        </style>
+                    </head>
+                    <body>
+                        <table>
+                            <tr>
+                                <td colspan="9" class="title">📚 سجل القراءات التفاعلي - ${new Date().toLocaleDateString('ar-SA')}</td>
+                            </tr>
+                            <tr>
+                                <td colspan="9" style="height: 10px;"></td>
+                            </tr>
+                            <tr class="header">
+                                <th>الرقم</th>
+                                <th>اسم الطالب</th>
+                                <th>التاريخ</th>
+                                <th>الوقت</th>
+                                <th>المستوى</th>
+                                <th>الوقت المحدد</th>
+                                <th>الوقت الفعلي</th>
+                                <th>النتيجة</th>
+                                <th>الفرق الزمني</th>
+                            </tr>
+                `;
+                
+                // Sort records by date and time (newest first)
+                const sortedRecords = [...this.readingRecords].sort((a, b) => b.id - a.id);
+                
+                sortedRecords.forEach((record, index) => {
+                    const studentName = record.studentName || 'غير محدد';
+                    const targetTimeStr = this.formatTime(record.targetTime);
+                    const actualTimeStr = this.formatTime(record.actualTime);
+                    const result = record.success ? 'نجح ✅' : 'لم ينجح ❌';
+                    const resultClass = record.success ? 'success' : 'failed';
+                    
+                    let difference = '';
+                    let differenceClass = '';
+                    
+                    if (record.success && record.timeDifference < 0) {
+                        difference = `وفر ${this.formatTime(Math.abs(record.timeDifference))} ⚡`;
+                        differenceClass = 'success';
+                    } else if (record.timeDifference > 0) {
+                        difference = `تجاوز بـ ${this.formatTime(record.timeDifference)} ⏰`;
+                        differenceClass = 'failed';
+                    } else {
+                        difference = 'في الوقت المحدد 🎯';
+                        differenceClass = 'success';
+                    }
+                    
+                    const levelText = `المستوى ${record.level}`;
+                    
+                    excelContent += `
+                        <tr>
+                            <td class="center">${index + 1}</td>
+                            <td class="right"><strong>${studentName}</strong></td>
+                            <td class="center">${record.date}</td>
+                            <td class="center">${record.time}</td>
+                            <td class="center">${levelText}</td>
+                            <td class="center">${targetTimeStr}</td>
+                            <td class="center">${actualTimeStr}</td>
+                            <td class="center ${resultClass}"><strong>${result}</strong></td>
+                            <td class="center ${differenceClass}"><strong>${difference}</strong></td>
+                        </tr>
+                    `;
+                });
+                
+                // Add statistics summary
+                const total = this.readingRecords.length;
+                const successful = this.readingRecords.filter(r => r.success).length;
+                const successRate = total > 0 ? Math.round((successful / total) * 100) : 0;
+                
+                excelContent += `
+                            <tr>
+                                <td colspan="9" style="height: 10px;"></td>
+                            </tr>
+                            <tr class="header">
+                                <td colspan="9">📊 ملخص الإحصائيات</td>
+                            </tr>
+                            <tr>
+                                <td class="center"><strong>إجمالي القراءات</strong></td>
+                                <td class="center">${total}</td>
+                                <td class="center"><strong>القراءات الناجحة</strong></td>
+                                <td class="center success">${successful}</td>
+                                <td class="center"><strong>معدل النجاح</strong></td>
+                                <td class="center success"><strong>${successRate}%</strong></td>
+                                <td colspan="3" class="center"><strong>تاريخ التصدير: ${new Date().toLocaleDateString('ar-SA')} - ${new Date().toLocaleTimeString('ar-SA')}</strong></td>
+                            </tr>
+                        </table>
+                    </body>
+                    </html>
+                `;
+                
+                // Create and download Excel file
+                const blob = new Blob([excelContent], { 
+                    type: 'application/vnd.ms-excel;charset=utf-8;' 
+                });
+                
+                const link = document.createElement('a');
+                const url = URL.createObjectURL(blob);
+                link.setAttribute('href', url);
+                
+                // Create filename with current date and time
+                const now = new Date();
+                const dateStr = now.toLocaleDateString('ar-SA').replace(/\//g, '-');
+                const timeStr = now.toLocaleTimeString('ar-SA', { hour12: false }).replace(/:/g, '-');
+                
+                link.setAttribute('download', `سجل_القراءات_${dateStr}_${timeStr}.xls`);
+                link.style.visibility = 'hidden';
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                
+                // Show success message
+                setTimeout(() => {
+                    alert(`✅ تم تصدير ${total} تسجيل بنجاح!\n📁 الملف: سجل_القراءات_${dateStr}_${timeStr}.xls`);
+                }, 500);
+            }
+            
+            updateStatistics() {
+                const total = this.readingRecords.length;
+                const successful = this.readingRecords.filter(r => r.success).length;
+                
+                this.totalReadingsEl.textContent = total;
+                this.successfulReadingsEl.textContent = successful;
+                
+                if (total > 0) {
+                    const totalTime = this.readingRecords.reduce((sum, r) => sum + r.actualTime, 0);
+                    const averageTime = Math.floor(totalTime / total);
+                    this.averageTimeEl.textContent = this.formatTime(averageTime);
+                    
+                    const successfulRecords = this.readingRecords.filter(r => r.success);
+                    if (successfulRecords.length > 0) {
+                        const bestTime = Math.min(...successfulRecords.map(r => r.actualTime));
+                        this.bestTimeEl.textContent = this.formatTime(bestTime);
+                    } else {
+                        this.bestTimeEl.textContent = '--';
+                    }
+                } else {
+                    this.averageTimeEl.textContent = '0:00';
+                    this.bestTimeEl.textContent = '--';
+                }
+            }
+            
+            displayRecords() {
+                if (this.readingRecords.length === 0) {
+                    this.recordsList.innerHTML = `
+                        <div class="text-center text-black py-8">
+                            📚 لا توجد تسجيلات بعد. ابدأ القراءة لحفظ أول تسجيل!
+                        </div>
+                    `;
+                    return;
+                }
+                
+                this.recordsList.innerHTML = this.readingRecords.map(record => {
+                    const targetTimeStr = this.formatTime(record.targetTime);
+                    const actualTimeStr = this.formatTime(record.actualTime);
+                    const statusIcon = record.success ? '✅' : '❌';
+                    const statusText = record.success ? 'نجح' : 'لم ينجح';
+                    const statusColor = record.success ? 'text-green-300' : 'text-red-300';
+                    const studentName = record.studentName || 'غير محدد';
+                    
+                    let timeDifferenceText = '';
+                    let timeDifferenceClass = '';
+                    
+                    if (record.success && record.timeDifference < 0) {
+                        timeDifferenceText = `وفر ${this.formatTime(Math.abs(record.timeDifference))}`;
+                        timeDifferenceClass = 'text-blue-300';
+                    } else if (record.timeDifference > 0) {
+                        timeDifferenceText = `تجاوز بـ ${this.formatTime(record.timeDifference)}`;
+                        timeDifferenceClass = 'text-red-300';
+                    } else {
+                        timeDifferenceText = 'في الوقت المحدد';
+                        timeDifferenceClass = 'text-green-300';
+                    }
+                    
+                    return `
+                        <div class="record-card rounded-xl p-6">
+                            <div class="flex justify-between items-start mb-4">
+                                <div class="flex items-center space-x-3 space-x-reverse">
+                                    <span class="text-2xl">${statusIcon}</span>
+                                    <div>
+                                        <span class="font-bold ${statusColor} text-lg">${statusText}</span>
+                                        <div class="text-black/70 text-sm font-semibold">المستوى ${record.level}</div>
+                                    </div>
+                                </div>
+                                <div class="text-black/70 text-sm text-left font-semibold">
+                                    <div>${record.date}</div>
+                                    <div>${record.time}</div>
+                                </div>
+                            </div>
+                            <div class="mb-4">
+                                <div class="flex items-center space-x-2 space-x-reverse">
+                                    <span class="text-black/70 text-sm font-semibold">👤 الطالب:</span>
+                                    <span class="font-bold text-black text-lg">${studentName}</span>
+                                </div>
+                            </div>
+                            <div class="grid md:grid-cols-3 gap-4 text-sm">
+                                <div class="text-center">
+                                    <div class="text-black/70 mb-1 font-semibold">الوقت المحدد</div>
+                                    <div class="font-bold text-black text-lg">${targetTimeStr}</div>
+                                </div>
+                                <div class="text-center">
+                                    <div class="text-black/70 mb-1 font-semibold">الوقت الفعلي</div>
+                                    <div class="font-bold text-black text-lg">${actualTimeStr}</div>
+                                </div>
+                                <div class="text-center">
+                                    <div class="text-black/70 mb-1 font-semibold">النتيجة</div>
+                                    <div class="font-bold ${timeDifferenceClass} text-lg">${timeDifferenceText}</div>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+            }
+            
+            formatTime(seconds) {
+                const minutes = Math.floor(seconds / 60);
+                const remainingSeconds = seconds % 60;
+                return `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`;
+            }
+        }
+        
+        // Initialize the reading tracker when page loads
+        document.addEventListener('DOMContentLoaded', () => {
+            new ReadingTracker();
+        });
+    </script>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'975e2671f623d5f6',t:'MTc1NjMyNDc3NS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>
