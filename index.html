@@ -3,18 +3,20 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>برنامج تسجيل القراءة التفاعلي</title>
+    <title>منصة القراءة الذكية - تطوير مهارات القراءة</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- ResponsiveVoice for better Arabic pronunciation -->
+    <script src="https://code.responsivevoice.org/responsivevoice.js?key=FREE"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Noto+Sans+Arabic:wght@300;400;500;600;700;800&family=Cairo:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700;800;900&family=Tajawal:wght@300;400;500;700;800;900&display=swap');
-        
         * {
             box-sizing: border-box;
         }
         
         body {
-            font-family: 'Cairo', 'Tajawal', sans-serif;
-            background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 50%, #ffffff 100%);
+            font-family: 'Cairo', 'Noto Sans Arabic', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 25%, #f093fb 50%, #f5576c 75%, #4facfe 100%);
             min-height: 100vh;
             position: relative;
             overflow-x: hidden;
@@ -28,65 +30,89 @@
             width: 100%;
             height: 100%;
             background: 
-                radial-gradient(circle at 20% 80%, rgba(33, 150, 243, 0.08) 0%, transparent 50%),
-                radial-gradient(circle at 80% 20%, rgba(156, 39, 176, 0.08) 0%, transparent 50%),
-                radial-gradient(circle at 40% 40%, rgba(103, 58, 183, 0.06) 0%, transparent 50%),
-                radial-gradient(circle at 60% 60%, rgba(255, 193, 7, 0.05) 0%, transparent 50%);
+                radial-gradient(circle at 20% 80%, rgba(102, 126, 234, 0.4) 0%, transparent 50%),
+                radial-gradient(circle at 80% 20%, rgba(245, 87, 108, 0.4) 0%, transparent 50%),
+                radial-gradient(circle at 40% 40%, rgba(79, 172, 254, 0.3) 0%, transparent 50%);
             pointer-events: none;
             z-index: -1;
+            animation: backgroundMove 20s ease-in-out infinite;
+        }
+        
+        @keyframes backgroundMove {
+            0%, 100% { transform: translateX(0) translateY(0); }
+            25% { transform: translateX(-20px) translateY(-10px); }
+            50% { transform: translateX(20px) translateY(10px); }
+            75% { transform: translateX(-10px) translateY(20px); }
         }
         
         .glass-card {
             background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(10px);
-            border: 2px solid rgba(255, 255, 255, 0.95);
-            box-shadow: 0 8px 25px 0 rgba(0, 0, 0, 0.08);
+            backdrop-filter: blur(20px);
+            border: 2px solid rgba(255, 255, 255, 0.9);
+            box-shadow: 
+                0 20px 60px rgba(0, 0, 0, 0.1),
+                0 8px 25px rgba(0, 0, 0, 0.08),
+                inset 0 1px 0 rgba(255, 255, 255, 0.6);
         }
         
         .glass-card-dark {
-            background: rgba(255, 255, 255, 0.92);
-            backdrop-filter: blur(8px);
-            border: 2px solid rgba(255, 255, 255, 0.9);
-            box-shadow: 0 4px 20px 0 rgba(0, 0, 0, 0.06);
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(25px);
+            border: 2px solid rgba(255, 255, 255, 0.8);
+            box-shadow: 
+                0 15px 45px rgba(0, 0, 0, 0.12),
+                inset 0 1px 0 rgba(255, 255, 255, 0.5);
         }
         
         .reading-text {
-            line-height: 2.5;
-            font-size: 1.25rem;
-            font-weight: 600;
-            color: #1a1a1a;
-            text-shadow: none;
+            line-height: 2.8;
+            font-size: 1.75rem;
+            font-weight: 500;
+            color: #1a202c;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+            letter-spacing: 1px;
+            word-spacing: 6px;
+            font-family: 'Amiri', 'Noto Sans Arabic', serif;
+            text-align: justify;
+            padding: 2rem;
         }
+        
+        .level-1 { font-size: 1.5rem; line-height: 2.5; }
+        .level-2 { font-size: 1.65rem; line-height: 2.6; }
+        .level-3 { font-size: 1.75rem; line-height: 2.8; }
+        .level-4 { font-size: 1.85rem; line-height: 3; }
         
         .timer-circle {
             stroke-dasharray: 283;
             stroke-dashoffset: 283;
             transition: stroke-dashoffset 1s linear;
-            filter: drop-shadow(0 0 8px rgba(59, 130, 246, 0.5));
+            filter: drop-shadow(0 0 12px rgba(59, 130, 246, 0.6));
         }
         
         .timer-container {
-            background: linear-gradient(145deg, rgba(255, 255, 255, 0.3), rgba(255, 255, 255, 0.1));
-            backdrop-filter: blur(20px);
-            border: 2px solid rgba(255, 255, 255, 0.3);
+            background: linear-gradient(145deg, rgba(255, 255, 255, 0.4), rgba(255, 255, 255, 0.2));
+            backdrop-filter: blur(25px);
+            border: 3px solid rgba(255, 255, 255, 0.4);
             box-shadow: 
-                0 8px 32px rgba(0, 0, 0, 0.1),
-                inset 0 1px 0 rgba(255, 255, 255, 0.4);
+                0 15px 45px rgba(0, 0, 0, 0.15),
+                inset 0 2px 0 rgba(255, 255, 255, 0.5);
         }
         
         .btn-gradient {
-            background: linear-gradient(145deg, #1976d2, #7b1fa2);
+            background: linear-gradient(145deg, #667eea, #764ba2);
             border: none;
             position: relative;
             overflow: hidden;
-            transition: all 0.3s ease;
-            box-shadow: 0 6px 20px rgba(25, 118, 210, 0.4);
-            font-weight: 600;
+            transition: all 0.4s ease;
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+            font-weight: 700;
+            transform: translateY(0);
         }
         
         .btn-gradient:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 10px 30px rgba(25, 118, 210, 0.6);
+            transform: translateY(-4px);
+            box-shadow: 0 15px 40px rgba(102, 126, 234, 0.6);
+            background: linear-gradient(145deg, #5a67d8, #6b46c1);
         }
         
         .btn-gradient::before {
@@ -96,8 +122,8 @@
             left: -100%;
             width: 100%;
             height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
-            transition: left 0.5s;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+            transition: left 0.6s;
         }
         
         .btn-gradient:hover::before {
@@ -105,986 +131,1470 @@
         }
         
         .btn-success {
-            background: linear-gradient(145deg, #10b981, #059669);
-            box-shadow: 0 4px 15px rgba(16, 185, 129, 0.4);
+            background: linear-gradient(145deg, #48bb78, #38a169);
+            box-shadow: 0 8px 25px rgba(72, 187, 120, 0.4);
         }
         
         .btn-success:hover {
-            box-shadow: 0 8px 25px rgba(16, 185, 129, 0.6);
-        }
-        
-        .btn-warning {
-            background: linear-gradient(145deg, #f59e0b, #d97706);
-            box-shadow: 0 4px 15px rgba(245, 158, 11, 0.4);
-        }
-        
-        .btn-warning:hover {
-            box-shadow: 0 8px 25px rgba(245, 158, 11, 0.6);
+            transform: translateY(-4px);
+            box-shadow: 0 15px 40px rgba(72, 187, 120, 0.6);
+            background: linear-gradient(145deg, #38a169, #2f855a);
         }
         
         .btn-danger {
-            background: linear-gradient(145deg, #ef4444, #dc2626);
-            box-shadow: 0 4px 15px rgba(239, 68, 68, 0.4);
+            background: linear-gradient(145deg, #f56565, #e53e3e);
+            box-shadow: 0 8px 25px rgba(245, 101, 101, 0.4);
         }
         
         .btn-danger:hover {
-            box-shadow: 0 8px 25px rgba(239, 68, 68, 0.6);
+            transform: translateY(-4px);
+            box-shadow: 0 15px 40px rgba(245, 101, 101, 0.6);
         }
         
-        .pulse {
-            animation: pulse 2s infinite;
+        .btn-warning {
+            background: linear-gradient(145deg, #ed8936, #dd6b20);
+            box-shadow: 0 8px 25px rgba(237, 137, 54, 0.4);
         }
         
-        @keyframes pulse {
-            0%, 100% { 
-                transform: scale(1);
-                box-shadow: 0 0 0 0 rgba(102, 126, 234, 0.7);
-            }
-            50% { 
-                transform: scale(1.05);
-                box-shadow: 0 0 0 10px rgba(102, 126, 234, 0);
-            }
-        }
-        
-        .celebration {
-            animation: celebration 0.8s ease-out;
-        }
-        
-        @keyframes celebration {
-            0% { transform: scale(1) rotate(0deg); }
-            25% { transform: scale(1.1) rotate(-5deg); }
-            50% { transform: scale(1.2) rotate(5deg); }
-            75% { transform: scale(1.1) rotate(-2deg); }
-            100% { transform: scale(1) rotate(0deg); }
-        }
-        
-        .float-animation {
-            animation: float 6s ease-in-out infinite;
-        }
-        
-        @keyframes float {
-            0%, 100% { transform: translateY(0px); }
-            50% { transform: translateY(-10px); }
-        }
-        
-        .slide-in {
-            animation: slideIn 0.5s ease-out;
-        }
-        
-        @keyframes slideIn {
-            from { 
-                opacity: 0;
-                transform: translateY(30px);
-            }
-            to { 
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-        
-        .glow {
-            box-shadow: 0 0 20px rgba(102, 126, 234, 0.6);
-        }
-        
-        .stat-card {
-            background: linear-gradient(145deg, rgba(255, 255, 255, 0.2), rgba(255, 255, 255, 0.05));
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.3);
-            transition: all 0.3s ease;
-        }
-        
-        .stat-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
-        }
-        
-        .record-card {
-            background: linear-gradient(145deg, rgba(255, 255, 255, 0.15), rgba(255, 255, 255, 0.05));
-            backdrop-filter: blur(8px);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            transition: all 0.3s ease;
-        }
-        
-        .record-card:hover {
-            transform: translateX(5px);
-            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.15);
-        }
-        
-        .level-indicator {
-            transition: all 0.3s ease;
-            position: relative;
-        }
-        
-        .level-indicator::after {
-            content: '';
-            position: absolute;
-            top: -2px;
-            left: -2px;
-            right: -2px;
-            bottom: -2px;
-            background: linear-gradient(45deg, #667eea, #764ba2, #667eea);
-            border-radius: 50%;
-            z-index: -1;
-            opacity: 0;
-            transition: opacity 0.3s ease;
-        }
-        
-        .level-indicator.active::after {
-            opacity: 1;
-            animation: rotate 2s linear infinite;
-        }
-        
-        @keyframes rotate {
-            from { transform: rotate(0deg); }
-            to { transform: rotate(360deg); }
-        }
-        
-        .text-gradient {
-            background: linear-gradient(135deg, #1565c0 0%, #7b1fa2 50%, #c2185b 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-            font-weight: 800;
-        }
-        
-        .sparkle {
-            position: relative;
-        }
-        
-        .sparkle::before {
-            content: '✨';
-            position: absolute;
-            top: -10px;
-            right: -10px;
-            animation: sparkle 2s ease-in-out infinite;
-        }
-        
-        @keyframes sparkle {
-            0%, 100% { opacity: 0; transform: scale(0.5) rotate(0deg); }
-            50% { opacity: 1; transform: scale(1) rotate(180deg); }
+        .btn-warning:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 15px 40px rgba(237, 137, 54, 0.6);
         }
         
         .progress-bar {
-            background: linear-gradient(90deg, #667eea, #764ba2);
-            height: 6px;
-            border-radius: 3px;
-            transition: width 0.3s ease;
-            box-shadow: 0 2px 10px rgba(102, 126, 234, 0.4);
+            background: linear-gradient(90deg, #48bb78, #38a169, #2f855a);
+            transition: width 0.5s ease;
+            box-shadow: 0 4px 15px rgba(72, 187, 120, 0.4);
+            position: relative;
+            overflow: hidden;
         }
         
-        .help-tip {
-            background: linear-gradient(145deg, rgba(16, 185, 129, 0.2), rgba(16, 185, 129, 0.05));
-            border-left: 4px solid #10b981;
+        .progress-bar::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+            animation: progressShine 2s infinite;
         }
         
-        .scrollbar-hide {
-            -ms-overflow-style: none;
-            scrollbar-width: none;
+        @keyframes progressShine {
+            0% { left: -100%; }
+            100% { left: 100%; }
         }
         
-        .scrollbar-hide::-webkit-scrollbar {
-            display: none;
+        .word-highlight {
+            background: linear-gradient(120deg, #f093fb, #f5576c);
+            padding: 4px 12px;
+            border-radius: 12px;
+            color: white;
+            font-weight: 800;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+            animation: wordPulse 1.2s infinite;
+            box-shadow: 0 4px 15px rgba(240, 147, 251, 0.5);
+        }
+        
+        @keyframes wordPulse {
+            0%, 100% { transform: scale(1); box-shadow: 0 4px 15px rgba(240, 147, 251, 0.5); }
+            50% { transform: scale(1.08); box-shadow: 0 8px 25px rgba(240, 147, 251, 0.7); }
+        }
+        
+        .stats-card {
+            background: linear-gradient(145deg, rgba(255, 255, 255, 0.95), rgba(255, 255, 255, 0.8));
+            backdrop-filter: blur(25px);
+            border: 2px solid rgba(255, 255, 255, 0.9);
+            transition: all 0.4s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .stats-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+            transition: left 0.6s;
+        }
+        
+        .stats-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.15);
+        }
+        
+        .stats-card:hover::before {
+            left: 100%;
+        }
+        
+        .floating-animation {
+            animation: float 4s ease-in-out infinite;
+        }
+        
+        @keyframes float {
+            0%, 100% { transform: translateY(0px) rotate(0deg); }
+            25% { transform: translateY(-8px) rotate(1deg); }
+            50% { transform: translateY(-15px) rotate(0deg); }
+            75% { transform: translateY(-8px) rotate(-1deg); }
+        }
+        
+        .level-badge {
+            background: linear-gradient(145deg, #667eea, #764ba2);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 25px;
+            font-weight: 700;
+            font-size: 0.9rem;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+            animation: badgeGlow 2s ease-in-out infinite alternate;
+        }
+        
+        @keyframes badgeGlow {
+            from { box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3); }
+            to { box-shadow: 0 6px 20px rgba(102, 126, 234, 0.5); }
+        }
+        
+        .encouragement-card {
+            background: linear-gradient(145deg, #f093fb, #f5576c);
+            color: white;
+            border-radius: 20px;
+            padding: 1.5rem;
+            text-align: center;
+            font-weight: 600;
+            box-shadow: 0 10px 30px rgba(240, 147, 251, 0.4);
+            animation: encouragementPulse 3s ease-in-out infinite;
+        }
+        
+        @keyframes encouragementPulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.02); }
+        }
+        
+        .audio-wave {
+            display: inline-block;
+            width: 4px;
+            height: 20px;
+            background: linear-gradient(to top, #48bb78, #38a169);
+            margin: 0 2px;
+            border-radius: 2px;
+            animation: audioWave 1.5s ease-in-out infinite;
+        }
+        
+        .audio-wave:nth-child(2) { animation-delay: 0.1s; }
+        .audio-wave:nth-child(3) { animation-delay: 0.2s; }
+        .audio-wave:nth-child(4) { animation-delay: 0.3s; }
+        .audio-wave:nth-child(5) { animation-delay: 0.4s; }
+        
+        @keyframes audioWave {
+            0%, 100% { height: 20px; }
+            50% { height: 40px; }
+        }
+        
+        .level-selector {
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(15px);
+            border: 2px solid rgba(255, 255, 255, 0.8);
+            border-radius: 15px;
+            padding: 1rem;
+            margin-bottom: 2rem;
+        }
+        
+        .level-button {
+            background: linear-gradient(145deg, rgba(255, 255, 255, 0.8), rgba(255, 255, 255, 0.6));
+            border: 2px solid rgba(102, 126, 234, 0.3);
+            border-radius: 12px;
+            padding: 1rem;
+            margin: 0.5rem;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        
+        .level-button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
+            border-color: rgba(102, 126, 234, 0.6);
+        }
+        
+        .level-button.active {
+            background: linear-gradient(145deg, #667eea, #764ba2);
+            color: white;
+            border-color: #667eea;
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.5);
+        }
+        
+        .progress-chart {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border-radius: 20px;
+            padding: 2rem;
+            margin-top: 2rem;
+        }
+        
+        .voice-selector {
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(15px);
+            border: 2px solid rgba(102, 126, 234, 0.3);
+            border-radius: 12px;
+            padding: 1rem;
+            margin-top: 1rem;
+        }
+        
+        .audio-quality-indicator {
+            display: inline-flex;
+            align-items: center;
+            background: linear-gradient(145deg, #48bb78, #38a169);
+            color: white;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: bold;
+            margin-right: 10px;
+        }
+        
+        .phonetic-helper {
+            background: rgba(255, 255, 255, 0.9);
+            border: 2px solid rgba(102, 126, 234, 0.3);
+            border-radius: 12px;
+            padding: 1rem;
+            margin-top: 1rem;
+            font-size: 0.9rem;
+            color: #4a5568;
         }
     </style>
 </head>
-<body class="min-h-screen p-4">
-    <div class="max-w-6xl mx-auto relative z-10">
+<body>
+    <div class="container mx-auto px-4 py-8 max-w-7xl">
         <!-- Header -->
-        <div class="text-center mb-12 float-animation">
-            <div class="inline-block sparkle">
-                <h1 class="text-5xl md:text-6xl font-bold text-gradient mb-4 drop-shadow-lg">
-                    📚 برنامج تسجيل القراءة التفاعلي
-                </h1>
-            </div>
-            <p class="text-black text-lg md:text-xl font-semibold">
-                تحدي القراءة المتدرج - من دقيقتين إلى نصف دقيقة! ✨
-            </p>
-            <div class="mt-4 w-32 h-1 bg-gradient-to-r from-transparent via-gray-400 to-transparent mx-auto opacity-60"></div>
-        </div>
-
-        <!-- Student Name Section -->
-        <div class="glass-card rounded-2xl p-8 mb-8 slide-in">
-            <h2 class="text-2xl font-bold text-black mb-6 text-center">👤 معلومات الطالب</h2>
-            <div class="max-w-md mx-auto">
-                <div class="mb-4">
-                    <label for="studentName" class="block text-black font-bold mb-3 text-lg">اسم الطالب *</label>
-                    <input 
-                        type="text" 
-                        id="studentName" 
-                        placeholder="أدخل اسم الطالب هنا..." 
-                        class="w-full px-6 py-4 rounded-xl bg-white/90 backdrop-blur-sm border-2 border-blue-300 text-gray-800 placeholder-gray-500 font-medium text-lg focus:outline-none focus:border-blue-500 focus:bg-white transition-all duration-300"
-                        required
-                    >
-                </div>
-                <div id="nameError" class="text-red-700 text-sm font-medium hidden bg-red-100 p-3 rounded-lg border border-red-300">
-                    ⚠️ يرجى إدخال اسم الطالب قبل البدء في القراءة
-                </div>
-                <div id="nameSuccess" class="text-green-700 text-sm font-medium hidden bg-green-100 p-3 rounded-lg border border-green-300">
-                    ✅ مرحباً <span id="welcomeName"></span>! يمكنك الآن البدء في القراءة
-                </div>
+        <div class="text-center mb-12">
+            <h1 class="text-6xl font-bold text-white mb-4 floating-animation drop-shadow-lg">
+                📚 منصة القراءة الذكية
+            </h1>
+            <p class="text-2xl text-white font-medium drop-shadow-md">تطوير مهارات القراءة والفهم للمرحلتين الإعدادية والثانوية</p>
+            <div class="mt-6">
+                <span class="level-badge">🎯 تعلم • تطور • تميز</span>
             </div>
         </div>
 
-        <!-- Progress Tracker -->
-        <div class="glass-card rounded-2xl p-8 mb-8 slide-in">
-            <h2 class="text-2xl font-bold text-black mb-6 text-center">🎯 مستوى التقدم</h2>
-            <div class="flex justify-center items-center mb-6">
-                <div class="flex items-center space-x-4 space-x-reverse">
-                    <div id="level1" class="level-indicator w-16 h-16 rounded-full bg-gradient-to-br from-yellow-400 to-orange-500 flex items-center justify-center text-white font-bold text-xl shadow-lg active">1</div>
-                    <div class="w-12 h-2 bg-gradient-to-r from-yellow-400 to-gray-300 rounded-full"></div>
-                    <div id="level2" class="level-indicator w-16 h-16 rounded-full bg-gray-400 flex items-center justify-center text-gray-600 font-bold text-xl shadow-lg">2</div>
-                    <div class="w-12 h-2 bg-gray-300 rounded-full"></div>
-                    <div id="level3" class="level-indicator w-16 h-16 rounded-full bg-gray-400 flex items-center justify-center text-gray-600 font-bold text-xl shadow-lg">3</div>
+        <!-- Level Selection -->
+        <div class="level-selector glass-card rounded-3xl mb-8">
+            <h3 class="text-2xl font-bold text-gray-800 mb-4 text-center">🎓 اختر مستواك التعليمي</h3>
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                <div class="level-button active" data-level="1">
+                    <div class="text-center">
+                        <div class="text-3xl mb-2">🌱</div>
+                        <div class="font-bold text-lg">المستوى الأول</div>
+                        <div class="text-sm text-gray-600">للطلاب المبتدئين</div>
+                    </div>
                 </div>
-            </div>
-            <div class="text-center">
-                <div id="currentLevel" class="text-xl font-bold text-black mb-2">المستوى الأول: دقيقتان</div>
-                <div class="text-gray-700 text-sm font-semibold">
-                    <span id="levelDescription">اقرأ الفقرة في دقيقتين أو أقل</span>
+                <div class="level-button" data-level="2">
+                    <div class="text-center">
+                        <div class="text-3xl mb-2">🌿</div>
+                        <div class="font-bold text-lg">المستوى الثاني</div>
+                        <div class="text-sm text-gray-600">للطلاب المتوسطين</div>
+                    </div>
+                </div>
+                <div class="level-button" data-level="3">
+                    <div class="text-center">
+                        <div class="text-3xl mb-2">🌳</div>
+                        <div class="font-bold text-lg">المستوى الثالث</div>
+                        <div class="text-sm text-gray-600">للطلاب المتقدمين</div>
+                    </div>
+                </div>
+                <div class="level-button" data-level="4">
+                    <div class="text-center">
+                        <div class="text-3xl mb-2">🏆</div>
+                        <div class="font-bold text-lg">المستوى الرابع</div>
+                        <div class="text-sm text-gray-600">للطلاب المتميزين</div>
+                    </div>
                 </div>
             </div>
         </div>
 
-        <!-- Timer Section -->
-        <div class="glass-card rounded-2xl p-8 mb-8 slide-in">
-            <div class="flex justify-center items-center mb-8">
-                <div class="timer-container rounded-full p-6">
-                    <div class="relative">
-                        <svg class="w-40 h-40 transform -rotate-90">
-                            <circle cx="80" cy="80" r="60" stroke="rgba(255,255,255,0.2)" stroke-width="8" fill="none"></circle>
-                            <circle id="timerCircle" cx="80" cy="80" r="60" stroke="url(#gradient)" stroke-width="8" fill="none" class="timer-circle"></circle>
-                            <defs>
-                                <linearGradient id="gradient" x1="0%" y1="0%" x2="100%" y2="0%">
-                                    <stop offset="0%" style="stop-color:#667eea;stop-opacity:1" />
-                                    <stop offset="100%" style="stop-color:#764ba2;stop-opacity:1" />
-                                </linearGradient>
-                            </defs>
-                        </svg>
-                        <div class="absolute inset-0 flex items-center justify-center">
-                            <div class="text-center">
-                                <div id="timeDisplay" class="text-4xl font-bold text-black drop-shadow-lg">2:00</div>
-                                <div class="text-sm text-gray-700 font-semibold">دقيقة</div>
+        <!-- Encouragement Card -->
+        <div class="encouragement-card mb-8">
+            <div class="text-2xl font-bold mb-2" id="encouragementTitle">🌟 أنت قادر على التميز!</div>
+            <div class="text-lg" id="encouragementText">القراءة مفتاح المعرفة، وأنت تملك هذا المفتاح. ابدأ رحلتك نحو التفوق!</div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <!-- Reading Section -->
+            <div class="lg:col-span-2">
+                <div class="glass-card rounded-3xl p-8 mb-8">
+                    <div class="flex justify-between items-center mb-6">
+                        <h2 class="text-3xl font-bold text-gray-800">📖 نص القراءة</h2>
+                        <div class="flex gap-3">
+                            <select id="textSelect" class="px-6 py-3 rounded-xl border-2 border-purple-200 bg-white/90 backdrop-blur-sm font-medium text-lg">
+                                <option value="0">النص الأول</option>
+                                <option value="1">النص الثاني</option>
+                                <option value="2">النص الثالث</option>
+                                <option value="3">النص الرابع</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="glass-card-dark rounded-2xl mb-6">
+                        <div id="readingText" class="reading-text level-1">
+                            <!-- النص سيتم تحميله هنا -->
+                        </div>
+                    </div>
+                    
+                    <!-- Reading Controls -->
+                    <div class="flex flex-wrap justify-center gap-4 mb-6">
+                        <button id="startBtn" class="btn-gradient text-white px-10 py-4 rounded-xl font-bold text-xl">
+                            🎯 ابدأ القراءة
+                        </button>
+                        <button id="pauseBtn" class="btn-danger text-white px-10 py-4 rounded-xl font-bold text-xl" disabled>
+                            ⏸️ توقف
+                        </button>
+                        <button id="resetBtn" class="btn-warning text-white px-10 py-4 rounded-xl font-bold text-xl">
+                            🔄 إعادة تعيين
+                        </button>
+                    </div>
+                    
+                    <!-- Enhanced Audio Reading Controls -->
+                    <div class="glass-card-dark rounded-2xl p-6 mb-6">
+                        <h4 class="text-2xl font-bold text-gray-800 mb-6 text-center">
+                            🔊 القراءة الصوتية العربية الفصيحة
+                            <span class="audio-quality-indicator">🎵 جودة عالية</span>
+                            <div id="audioIndicator" class="hidden mt-2">
+                                <span class="audio-wave"></span>
+                                <span class="audio-wave"></span>
+                                <span class="audio-wave"></span>
+                                <span class="audio-wave"></span>
+                                <span class="audio-wave"></span>
                             </div>
+                        </h4>
+                        
+                        <div class="flex flex-wrap justify-center gap-4 mb-6">
+                            <button id="playAudioBtn" class="btn-success text-white px-8 py-3 rounded-xl font-bold text-lg">
+                                ▶️ تشغيل الصوت العربي
+                            </button>
+                            <button id="pauseAudioBtn" class="btn-danger text-white px-8 py-3 rounded-xl font-bold text-lg" disabled>
+                                ⏸️ إيقاف مؤقت
+                            </button>
+                            <button id="stopAudioBtn" class="btn-warning text-white px-8 py-3 rounded-xl font-bold text-lg">
+                                ⏹️ إيقاف تام
+                            </button>
+                            <button id="repeatAudioBtn" class="btn-gradient text-white px-8 py-3 rounded-xl font-bold text-lg">
+                                🔄 إعادة الجملة
+                            </button>
+                        </div>
+                        
+                        <!-- Voice Selection -->
+                        <div class="voice-selector mb-6">
+                            <h5 class="text-lg font-bold text-gray-700 mb-3 text-center">🎤 اختر الصوت المفضل</h5>
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                <button class="voice-option active" data-voice="arabic-female">
+                                    <div class="text-center p-3 bg-white/70 rounded-xl border-2 border-purple-300">
+                                        <div class="text-2xl mb-2">👩‍🏫</div>
+                                        <div class="font-bold">صوت أنثوي</div>
+                                        <div class="text-sm text-gray-600">واضح ومناسب للطلاب</div>
+                                    </div>
+                                </button>
+                                <button class="voice-option" data-voice="arabic-male">
+                                    <div class="text-center p-3 bg-white/70 rounded-xl border-2 border-purple-300">
+                                        <div class="text-2xl mb-2">👨‍🏫</div>
+                                        <div class="font-bold">صوت ذكوري</div>
+                                        <div class="text-sm text-gray-600">قوي ومؤثر</div>
+                                    </div>
+                                </button>
+                                <button class="voice-option" data-voice="arabic-child">
+                                    <div class="text-center p-3 bg-white/70 rounded-xl border-2 border-purple-300">
+                                        <div class="text-2xl mb-2">👶</div>
+                                        <div class="font-bold">صوت طفولي</div>
+                                        <div class="text-sm text-gray-600">مناسب للمبتدئين</div>
+                                    </div>
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <!-- Audio Settings -->
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+                            <div class="text-center">
+                                <label class="block text-lg font-bold text-gray-700 mb-3">سرعة القراءة</label>
+                                <input type="range" id="speedRange" min="0.3" max="1.5" step="0.1" value="0.7" 
+                                       class="w-full h-3 bg-gradient-to-r from-blue-200 to-purple-200 rounded-lg appearance-none cursor-pointer">
+                                <span id="speedValue" class="text-lg font-bold text-gray-600">0.7x</span>
+                            </div>
+                            <div class="text-center">
+                                <label class="block text-lg font-bold text-gray-700 mb-3">درجة الصوت</label>
+                                <input type="range" id="pitchRange" min="0.8" max="1.3" step="0.1" value="1" 
+                                       class="w-full h-3 bg-gradient-to-r from-green-200 to-blue-200 rounded-lg appearance-none cursor-pointer">
+                                <span id="pitchValue" class="text-lg font-bold text-gray-600">1.0</span>
+                            </div>
+                            <div class="text-center">
+                                <label class="block text-lg font-bold text-gray-700 mb-3">مستوى الصوت</label>
+                                <input type="range" id="volumeRange" min="0.5" max="1" step="0.1" value="1" 
+                                       class="w-full h-3 bg-gradient-to-r from-yellow-200 to-red-200 rounded-lg appearance-none cursor-pointer">
+                                <span id="volumeValue" class="text-lg font-bold text-gray-600">100%</span>
+                            </div>
+                        </div>
+                        
+                        <!-- Reading Options -->
+                        <div class="flex flex-wrap justify-center gap-6 mb-4">
+                            <label class="flex items-center bg-white/60 px-4 py-2 rounded-xl">
+                                <input type="checkbox" id="highlightWords" checked class="mr-3 w-5 h-5 rounded">
+                                <span class="text-lg font-medium text-gray-700">تمييز الكلمات أثناء القراءة</span>
+                            </label>
+                            <label class="flex items-center bg-white/60 px-4 py-2 rounded-xl">
+                                <input type="checkbox" id="autoScroll" checked class="mr-3 w-5 h-5 rounded">
+                                <span class="text-lg font-medium text-gray-700">التمرير التلقائي</span>
+                            </label>
+                            <label class="flex items-center bg-white/60 px-4 py-2 rounded-xl">
+                                <input type="checkbox" id="slowMode" class="mr-3 w-5 h-5 rounded">
+                                <span class="text-lg font-medium text-gray-700">الوضع البطيء للمبتدئين</span>
+                            </label>
+                        </div>
+                        
+                        <!-- Phonetic Helper -->
+                        <div class="phonetic-helper">
+                            <h6 class="font-bold text-gray-700 mb-2">💡 مساعد النطق:</h6>
+                            <p class="text-sm">استمع للنطق الصحيح لكل كلمة واتبع الإيقاع الطبيعي للغة العربية الفصيحة</p>
                         </div>
                     </div>
                 </div>
-            </div>
-            
-            <div class="flex flex-wrap justify-center gap-4">
-                <button id="startBtn" class="btn-gradient btn-success text-white px-8 py-4 rounded-xl font-bold text-lg shadow-lg">
-                    🚀 ابدأ القراءة
-                </button>
-                <button id="pauseBtn" class="btn-gradient btn-warning text-white px-8 py-4 rounded-xl font-bold text-lg shadow-lg hidden">
-                    ⏸️ توقف
-                </button>
-                <button id="finishBtn" class="btn-gradient text-white px-8 py-4 rounded-xl font-bold text-lg shadow-lg hidden">
-                    ✅ انتهيت من القراءة
-                </button>
-                <button id="resetBtn" class="btn-gradient bg-gradient-to-r from-gray-500 to-gray-600 text-white px-8 py-4 rounded-xl font-bold text-lg shadow-lg">
-                    🔄 إعادة تعيين
-                </button>
-            </div>
-        </div>
 
-        <!-- Reading Text -->
-        <div class="glass-card rounded-2xl p-8 mb-8 slide-in">
-            <h3 class="text-2xl font-bold text-black mb-6 text-center">📖 النص للقراءة</h3>
-            <div class="bg-white/95 backdrop-blur-sm border-2 border-gray-200 rounded-xl p-6 shadow-lg">
-                <div class="reading-text leading-relaxed">
-                <p class="mb-4">
-                    تُعَدُّ التِّكْنُولُوجِيَا الحَدِيثَةُ مِنْ أَهَمِّ العَوَامِلِ المُؤَثِّرَةِ فِي تَطَوُّرِ المُجْتَمَعَاتِ المُعَاصِرَةِ، حَيْثُ أَحْدَثَتْ ثَوْرَةً حَقِيقِيَّةً فِي جَمِيعِ مَجَالَاتِ الحَيَاةِ. فَقَدْ غَيَّرَتْ طَرِيقَةَ تَفْكِيرِنَا وَتَعَامُلِنَا مَعَ المَعْلُومَاتِ، وَأَصْبَحَتْ جُزْءَاً لَا يَتَجَزَّأُ مِنْ حَيَاتِنَا اليَوْمِيَّةِ. وَمِنْ أَبْرَزِ تَطْبِيقَاتِهَا الذَّكَاءُ الاصْطِنَاعِيُّ الَّذِي يُحَاكِي قُدْرَاتِ العَقْلِ البَشَرِيِّ فِي التَّعَلُّمِ وَالاسْتِنْتَاجِ.
-                </p>
-                <p class="mb-4">
-                    وَلَقَدْ أَسْهَمَتِ الثَّوْرَةُ الرَّقْمِيَّةُ فِي تَسْهِيلِ عَمَلِيَّاتِ التَّوَاصُلِ بَيْنَ الشُّعُوبِ، وَكَسَرَتْ حَوَاجِزَ المَسَافَاتِ الجُغْرَافِيَّةِ، مِمَّا أَدَّى إِلَى نَشْأَةِ مَا يُسَمَّى بِالقَرْيَةِ الكَوْنِيَّةِ. كَمَا سَاعَدَتْ فِي تَطْوِيرِ أَسَالِيبِ التَّعْلِيمِ وَالطِّبِّ وَالصِّنَاعَةِ، وَفَتَحَتْ آفَاقَاً جَدِيدَةً لِلإِبْدَاعِ وَالابْتِكَارِ. غَيْرَ أَنَّ هَذَا التَّقَدُّمَ المُتَسَارِعَ يَتَطَلَّبُ مِنَّا مُوَاكَبَةً مُسْتَمِرَّةً وَتَطْوِيرَاً لِمَهَارَاتِنَا لِنَكُونَ قَادِرِينَ عَلَى التَّكَيُّفِ مَعَ مُتَطَلَّبَاتِ العَصْرِ.
-                </p>
-                <p>
-                    وَفِي ظِلِّ هَذِهِ التَّطَوُّرَاتِ المُتَلَاحِقَةِ، يَجِبُ عَلَيْنَا أَنْ نَسْتَثْمِرَ التِّكْنُولُوجِيَا بِحِكْمَةٍ وَوَعْيٍ، وَأَنْ نُحَافِظَ عَلَى قِيَمِنَا الإِنْسَانِيَّةِ وَهُوِيَّتِنَا الثَّقَافِيَّةِ. فَالتَّوَازُنُ بَيْنَ الاسْتِفَادَةِ مِنْ مُنْجَزَاتِ العِلْمِ وَالحِفَاظِ عَلَى أُصُولِنَا هُوَ السَّبِيلُ الأَمْثَلُ لِبِنَاءِ مُسْتَقْبَلٍ مُشْرِقٍ يَجْمَعُ بَيْنَ التَّقَدُّمِ وَالأَصَالَةِ.
-                </p>
-                </div>
-            </div>
-        </div>
-
-        <!-- Help Section -->
-        <div class="glass-card rounded-2xl p-8 mb-8 slide-in">
-            <h3 class="text-2xl font-bold text-black mb-6 text-center">🆘 مساعدة للطلاب</h3>
-            <div id="helpSection" class="hidden">
-                <div class="grid md:grid-cols-2 gap-6 mb-6">
-                    <div class="help-tip p-6 rounded-xl backdrop-blur-sm">
-                        <h4 class="font-bold text-black mb-4 text-lg">💡 نصائح للقراءة السريعة</h4>
-                        <ul class="text-gray-800 space-y-2">
-                            <li class="flex items-center"><span class="text-green-600 mr-2">✓</span> اقرأ بعينيك وليس بصوت عالٍ</li>
-                            <li class="flex items-center"><span class="text-green-600 mr-2">✓</span> ركز على الكلمات المهمة</li>
-                            <li class="flex items-center"><span class="text-green-600 mr-2">✓</span> لا تتوقف عند كل كلمة</li>
-                            <li class="flex items-center"><span class="text-green-600 mr-2">✓</span> تدرب على القراءة يومياً</li>
-                        </ul>
+                <!-- Progress Section -->
+                <div class="glass-card rounded-3xl p-8 mb-8">
+                    <h3 class="text-3xl font-bold text-gray-800 mb-6">📊 تقدم القراءة</h3>
+                    <div class="mb-6">
+                        <div class="flex justify-between text-lg font-bold text-gray-700 mb-3">
+                            <span>الكلمات المقروءة</span>
+                            <span id="progressText">0 / 0</span>
+                        </div>
+                        <div class="w-full bg-gray-200 rounded-full h-6">
+                            <div id="progressBar" class="progress-bar h-6 rounded-full" style="width: 0%"></div>
+                        </div>
                     </div>
-                    <div class="help-tip p-6 rounded-xl backdrop-blur-sm">
-                        <h4 class="font-bold text-black mb-4 text-lg">🎯 تقنيات التركيز</h4>
-                        <ul class="text-gray-800 space-y-2">
-                            <li class="flex items-center"><span class="text-blue-600 mr-2">◆</span> خذ نفساً عميقاً قبل البدء</li>
-                            <li class="flex items-center"><span class="text-blue-600 mr-2">◆</span> اجلس في مكان هادئ</li>
-                            <li class="flex items-center"><span class="text-blue-600 mr-2">◆</span> ضع إصبعك تحت السطر</li>
-                            <li class="flex items-center"><span class="text-blue-600 mr-2">◆</span> لا تقلق من الأخطاء</li>
-                        </ul>
+                    
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-6 mt-8">
+                        <div class="text-center bg-blue-50 p-4 rounded-xl">
+                            <div class="text-4xl font-bold text-blue-600" id="wordsRead">0</div>
+                            <div class="text-sm text-gray-600 font-medium">كلمة مقروءة</div>
+                        </div>
+                        <div class="text-center bg-green-50 p-4 rounded-xl">
+                            <div class="text-4xl font-bold text-green-600" id="readingSpeed">0</div>
+                            <div class="text-sm text-gray-600 font-medium">كلمة/دقيقة</div>
+                        </div>
+                        <div class="text-center bg-purple-50 p-4 rounded-xl">
+                            <div class="text-4xl font-bold text-purple-600" id="accuracy">100%</div>
+                            <div class="text-sm text-gray-600 font-medium">دقة القراءة</div>
+                        </div>
+                        <div class="text-center bg-orange-50 p-4 rounded-xl">
+                            <div class="text-4xl font-bold text-orange-600" id="level">1</div>
+                            <div class="text-sm text-gray-600 font-medium">المستوى الحالي</div>
+                        </div>
                     </div>
                 </div>
-                <div class="glass-card-dark p-6 rounded-xl text-center">
-                    <h4 class="font-bold text-yellow-700 mb-3 text-lg">🌟 تذكر</h4>
-                    <p class="text-gray-800 font-medium">القراءة مهارة تحتاج للتدريب. كل محاولة تجعلك أفضل من السابقة! 💪</p>
+
+                <!-- Progress Chart -->
+                <div class="progress-chart glass-card">
+                    <h3 class="text-2xl font-bold text-gray-800 mb-4 text-center">📈 مخطط التقدم</h3>
+                    <canvas id="progressChart" width="400" height="200"></canvas>
                 </div>
             </div>
-            <div class="text-center">
-                <button id="helpBtn" class="btn-gradient text-white px-6 py-3 rounded-xl font-bold shadow-lg">
-                    📋 إظهار النصائح
-                </button>
-            </div>
-        </div>
 
-        <!-- Results Section -->
-        <div id="resultsSection" class="glass-card rounded-2xl p-8 mb-8 hidden slide-in">
-            <h3 class="text-2xl font-bold text-black mb-6 text-center">🏆 النتائج</h3>
-            <div id="resultContent" class="text-center">
-                <!-- Results will be displayed here -->
-            </div>
-        </div>
+            <!-- Timer and Stats -->
+            <div class="space-y-8">
+                <!-- Timer -->
+                <div class="glass-card rounded-3xl p-8 text-center">
+                    <h3 class="text-2xl font-bold text-gray-800 mb-6">⏱️ المؤقت</h3>
+                    <div class="timer-container rounded-full w-56 h-56 mx-auto flex items-center justify-center relative">
+                        <svg class="w-52 h-52 transform -rotate-90 absolute">
+                            <circle cx="104" cy="104" r="50" stroke="#e5e7eb" stroke-width="10" fill="none"/>
+                            <circle id="timerCircle" class="timer-circle" cx="104" cy="104" r="50" stroke="#667eea" stroke-width="10" fill="none"/>
+                        </svg>
+                        <div class="text-center z-10">
+                            <div id="timerDisplay" class="text-5xl font-bold text-gray-800">00:00</div>
+                            <div class="text-lg text-gray-600 mt-2 font-medium">دقيقة:ثانية</div>
+                        </div>
+                    </div>
+                </div>
 
-        <!-- Reading Records Section -->
-        <div class="glass-card rounded-2xl p-8 mb-8 slide-in">
-            <div class="flex flex-col md:flex-row justify-between items-center mb-8 gap-4">
-                <h3 class="text-2xl font-bold text-black">📊 سجل القراءات</h3>
-                <div class="flex space-x-3 space-x-reverse">
-                    <button id="clearRecordsBtn" class="btn-gradient btn-danger text-white px-6 py-3 rounded-xl font-bold shadow-lg">
-                        🗑️ مسح السجل
+                <!-- Statistics -->
+                <div class="stats-card rounded-3xl p-8">
+                    <h3 class="text-2xl font-bold text-gray-800 mb-6">📈 إحصائياتك</h3>
+                    <div class="space-y-4">
+                        <div class="flex justify-between items-center p-4 bg-gradient-to-r from-blue-50 to-blue-100 rounded-xl">
+                            <span class="font-bold text-gray-700">إجمالي الجلسات</span>
+                            <span id="totalSessions" class="text-3xl font-bold text-blue-600">0</span>
+                        </div>
+                        <div class="flex justify-between items-center p-4 bg-gradient-to-r from-green-50 to-green-100 rounded-xl">
+                            <span class="font-bold text-gray-700">إجمالي الكلمات</span>
+                            <span id="totalWords" class="text-3xl font-bold text-green-600">0</span>
+                        </div>
+                        <div class="flex justify-between items-center p-4 bg-gradient-to-r from-purple-50 to-purple-100 rounded-xl">
+                            <span class="font-bold text-gray-700">متوسط السرعة</span>
+                            <span id="avgSpeed" class="text-3xl font-bold text-purple-600">0</span>
+                        </div>
+                        <div class="flex justify-between items-center p-4 bg-gradient-to-r from-yellow-50 to-yellow-100 rounded-xl">
+                            <span class="font-bold text-gray-700">أفضل سرعة</span>
+                            <span id="bestSpeed" class="text-3xl font-bold text-yellow-600">0</span>
+                        </div>
+                        <div class="flex justify-between items-center p-4 bg-gradient-to-r from-pink-50 to-pink-100 rounded-xl">
+                            <span class="font-bold text-gray-700">الوقت الإجمالي</span>
+                            <span id="totalTime" class="text-3xl font-bold text-pink-600">0د</span>
+                        </div>
+                    </div>
+                    
+                    <button id="clearStats" class="w-full mt-6 bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white py-4 rounded-xl font-bold text-lg transition-all transform hover:scale-105">
+                        🗑️ مسح الإحصائيات
                     </button>
-                    <button id="exportRecordsBtn" class="btn-gradient btn-success text-white px-6 py-3 rounded-xl font-bold shadow-lg">
-                        📥 تصدير Excel
-                    </button>
                 </div>
-            </div>
-            
-            <!-- Statistics Summary -->
-            <div id="statisticsSection" class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-                <div class="stat-card p-6 rounded-xl text-center">
-                    <div class="text-3xl font-bold text-blue-600 mb-2" id="totalReadings">0</div>
-                    <div class="text-sm text-black font-semibold">إجمالي القراءات</div>
+                
+                <!-- Enhanced Tips Section -->
+                <div class="glass-card rounded-3xl p-8">
+                    <h3 class="text-2xl font-bold text-gray-800 mb-6">💡 نصائح للتفوق</h3>
+                    <div class="space-y-4 text-sm">
+                        <div class="p-4 bg-gradient-to-r from-blue-50 to-blue-100 rounded-xl border-l-4 border-blue-500">
+                            <h4 class="font-bold text-blue-800 mb-2">🎧 للطلاب الضعاف:</h4>
+                            <p class="text-blue-700">استخدم الصوت البطيء واستمع عدة مرات قبل المحاولة بمفردك</p>
+                        </div>
+                        <div class="p-4 bg-gradient-to-r from-green-50 to-green-100 rounded-xl border-l-4 border-green-500">
+                            <h4 class="font-bold text-green-800 mb-2">⚡ لزيادة السرعة:</h4>
+                            <p class="text-green-700">ابدأ بسرعة 0.5x ثم زد تدريجياً حتى تصل للسرعة الطبيعية</p>
+                        </div>
+                        <div class="p-4 bg-gradient-to-r from-purple-50 to-purple-100 rounded-xl border-l-4 border-purple-500">
+                            <h4 class="font-bold text-purple-800 mb-2">🎯 للتركيز:</h4>
+                            <p class="text-purple-700">استخدم تمييز الكلمات والتمرير التلقائي لمتابعة أفضل</p>
+                        </div>
+                        <div class="p-4 bg-gradient-to-r from-orange-50 to-orange-100 rounded-xl border-l-4 border-orange-500">
+                            <h4 class="font-bold text-orange-800 mb-2">📚 للفهم العميق:</h4>
+                            <p class="text-orange-700">اقرأ النص أكثر من مرة وحاول فهم المعنى العام</p>
+                        </div>
+                        <div class="p-4 bg-gradient-to-r from-pink-50 to-pink-100 rounded-xl border-l-4 border-pink-500">
+                            <h4 class="font-bold text-pink-800 mb-2">🏆 للتميز:</h4>
+                            <p class="text-pink-700">مارس القراءة يومياً لمدة 15-30 دقيقة لتحقيق أفضل النتائج</p>
+                        </div>
+                    </div>
                 </div>
-                <div class="stat-card p-6 rounded-xl text-center">
-                    <div class="text-3xl font-bold text-green-600 mb-2" id="successfulReadings">0</div>
-                    <div class="text-sm text-black font-semibold">قراءات ناجحة</div>
-                </div>
-                <div class="stat-card p-6 rounded-xl text-center">
-                    <div class="text-3xl font-bold text-orange-600 mb-2" id="averageTime">0:00</div>
-                    <div class="text-sm text-black font-semibold">متوسط الوقت</div>
-                </div>
-                <div class="stat-card p-6 rounded-xl text-center">
-                    <div class="text-3xl font-bold text-purple-600 mb-2" id="bestTime">--</div>
-                    <div class="text-sm text-black font-semibold">أفضل وقت</div>
-                </div>
-            </div>
 
-            <!-- Records List -->
-            <div id="recordsList" class="space-y-4 max-h-96 overflow-y-auto scrollbar-hide">
-                <div class="text-center text-gray-600 py-12">
-                    <div class="text-6xl mb-4">📚</div>
-                    <p class="text-lg">لا توجد تسجيلات بعد</p>
-                    <p class="text-sm">ابدأ القراءة لحفظ أول تسجيل!</p>
+                <!-- Achievement Badges -->
+                <div class="glass-card rounded-3xl p-8">
+                    <h3 class="text-2xl font-bold text-gray-800 mb-6">🏅 إنجازاتك</h3>
+                    <div id="achievementBadges" class="grid grid-cols-2 gap-4">
+                        <!-- سيتم إضافة الشارات هنا -->
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 
     <script>
-        class ReadingTracker {
+        class SmartReadingPlatform {
             constructor() {
+                // النصوص المتدرجة حسب المستوى
+                this.texts = {
+                    1: [ // المستوى الأول - للمبتدئين
+                        {
+                            title: "الطَّائِرُ الصَّغِيرُ",
+                            content: "كَانَ هُنَاكَ طَائِرٌ صَغِيرٌ يَعِيشُ فِي غَابَةٍ جَمِيلَةٍ. كَانَ الطَّائِرُ يُحِبُّ الغِنَاءَ كُلَّ صَبَاحٍ. فِي يَوْمٍ مِنَ الأَيَّامِ، قَرَّرَ الطَّائِرُ أَنْ يَسْتَكْشِفَ أَجْزَاءً جَدِيدَةً مِنَ الغَابَةِ. طَارَ عَالِيًا فَوْقَ الأَشْجَارِ وَرَأَى مَنْظَرًا رَائِعًا. عَادَ الطَّائِرُ إِلَى عُشِّهِ سَعِيدًا بِمَا رَآهُ."
+                        },
+                        {
+                            title: "الفَلَّاحُ الطَّيِّبُ",
+                            content: "فِي قَرْيَةٍ صَغِيرَةٍ، كَانَ يَعِيشُ فَلَّاحٌ طَيِّبُ القَلْبِ. كَانَ يَزْرَعُ الخُضْرَوَاتِ وَالفَوَاكِهَ فِي حَقْلِهِ الصَّغِيرِ. كُلَّ يَوْمٍ، كَانَ يَسْتَيْقِظُ مُبَكِّرًا لِيَعْتَنِيَ بِنَبَاتَاتِهِ. الجِيرَانُ يُحِبُّونَهُ كَثِيرًا لأَنَّهُ يُسَاعِدُهُمْ دَائِمًا. فِي نِهَايَةِ المَوْسِمِ، كَانَ مَحْصُولُهُ وَفِيرًا وَجَمِيلًا."
+                        }
+                    ],
+                    2: [ // المستوى الثاني - للمتوسطين
+                        {
+                            title: "رِحْلَةُ الاِكْتِشَافِ",
+                            content: "انْطَلَقَتْ مَجْمُوعَةٌ مِنَ الطُّلَّابِ فِي رِحْلَةٍ عِلْمِيَّةٍ إِلَى المُتْحَفِ الطَّبِيعِيِّ. كَانُوا مُتَحَمِّسِينَ لِرُؤْيَةِ الهَيَاكِلِ العَظْمِيَّةِ لِلدِّينَاصُورَاتِ وَالحَيَوَانَاتِ المُنْقَرِضَةِ. شَرَحَ لَهُمُ المُرْشِدُ تَارِيخَ هَذِهِ المَخْلُوقَاتِ وَكَيْفَ عَاشَتْ عَلَى الأَرْضِ مَلَايِينَ السِّنِينَ. تَعَلَّمَ الطُّلَّابُ أَهَمِّيَّةَ الحِفَاظِ عَلَى البِيئَةِ وَحِمَايَةِ الحَيَوَانَاتِ مِنَ الانْقِرَاضِ."
+                        },
+                        {
+                            title: "عَالِمُ الفَضَاءِ الشَّابُّ",
+                            content: "أَحْمَدُ طَالِبٌ فِي المَرْحَلَةِ الثَّانَوِيَّةِ يَحْلُمُ بِأَنْ يُصْبِحَ عَالِمَ فَضَاءٍ. يَقْضِي سَاعَاتٍ طَوِيلَةً فِي قِرَاءَةِ الكُتُبِ العِلْمِيَّةِ وَمُشَاهَدَةِ الأَفْلَامِ الوَثَائِقِيَّةِ عَنِ الكَوَاكِبِ وَالنُّجُومِ. يَسْتَخْدِمُ تِلِسْكُوبًا صَغِيرًا لِمُرَاقَبَةِ القَمَرِ وَالكَوَاكِبِ فِي اللَّيْلِ. يُؤْمِنُ أَحْمَدُ بِأَنَّ العِلْمَ وَالمَعْرِفَةَ هُمَا مِفْتَاحُ التَّقَدُّمِ وَالنَّجَاحِ."
+                        }
+                    ],
+                    3: [ // المستوى الثالث - للمتقدمين
+                        {
+                            title: "التِّكْنُولُوجِيَا وَالتَّعْلِيمُ",
+                            content: "شَهِدَ القَرْنُ الحَادِي وَالعِشْرُونَ تَطَوُّرًا هَائِلًا فِي مَجَالِ التِّكْنُولُوجِيَا التَّعْلِيمِيَّةِ. أَصْبَحَتِ الفُصُولُ الذَّكِيَّةُ وَالتَّعَلُّمُ الإِلِكْتُرُونِيُّ جُزْءًا لَا يَتَجَزَّأُ مِنَ العَمَلِيَّةِ التَّعْلِيمِيَّةِ. تُسَاعِدُ هَذِهِ التِّقْنِيَّاتُ الطُّلَّابَ عَلَى فَهْمِ المَفَاهِيمِ المُعَقَّدَةِ بِطَرِيقَةٍ تَفَاعُلِيَّةٍ وَمُمْتِعَةٍ. كَمَا تُتِيحُ لِلْمُعَلِّمِينَ إِمْكَانِيَّةَ تَخْصِيصِ التَّعْلِيمِ وَفْقًا لِاحْتِيَاجَاتِ كُلِّ طَالِبٍ عَلَى حِدَةٍ."
+                        },
+                        {
+                            title: "الطَّاقَةُ المُتَجَدِّدَةُ",
+                            content: "تُعَدُّ الطَّاقَةُ المُتَجَدِّدَةُ مِنْ أَهَمِّ الحُلُولِ لِمُوَاجَهَةِ تَحَدِّيَاتِ التَّغَيُّرِ المُنَاخِيِّ وَالحِفَاظِ عَلَى البِيئَةِ. تَشْمَلُ مَصَادِرُ الطَّاقَةِ المُتَجَدِّدَةِ الطَّاقَةَ الشَّمْسِيَّةَ وَطَاقَةَ الرِّيَاحِ وَالطَّاقَةَ المَائِيَّةَ. تَسْتَثْمِرُ العَدِيدُ مِنَ الدُّوَلِ مِلْيَارَاتِ الدُّولَارَاتِ فِي تَطْوِيرِ هَذِهِ التِّقْنِيَّاتِ لِتَقْلِيلِ الاِعْتِمَادِ عَلَى الوَقُودِ الأُحْفُورِيِّ وَخَفْضِ انْبِعَاثَاتِ الكَرْبُونِ."
+                        }
+                    ],
+                    4: [ // المستوى الرابع - للمتميزين
+                        {
+                            title: "الذَّكَاءُ الاِصْطِنَاعِيُّ وَمُسْتَقْبَلُ البَشَرِيَّةِ",
+                            content: "يُمَثِّلُ الذَّكَاءُ الاِصْطِنَاعِيُّ نَقْلَةً نَوْعِيَّةً فِي تَارِيخِ التِّكْنُولُوجِيَا، حَيْثُ يُحَاكِي قُدْرَاتِ العَقْلِ البَشَرِيِّ فِي التَّعَلُّمِ وَالاِسْتِنْتَاجِ وَحَلِّ المُشْكِلَاتِ. تَتَنَوَّعُ تَطْبِيقَاتُهُ مِنَ الطِّبِّ وَالهَنْدَسَةِ إِلَى التَّعْلِيمِ وَالفُنُونِ. وَرَغْمَ الفَوَائِدِ الهَائِلَةِ الَّتِي يُقَدِّمُهَا، إِلَّا أَنَّهُ يُثِيرُ تَسَاؤُلَاتٍ أَخْلَاقِيَّةً وَاجْتِمَاعِيَّةً مُهِمَّةً حَوْلَ مُسْتَقْبَلِ العَمَلِ وَالخُصُوصِيَّةِ وَالأَمَانِ السَّيْبَرَانِيِّ."
+                        },
+                        {
+                            title: "الحَضَارَةُ الإِسْلَامِيَّةُ وَإِسْهَامَاتُهَا العِلْمِيَّةُ",
+                            content: "أَسْهَمَتِ الحَضَارَةُ الإِسْلَامِيَّةُ إِسْهَامَاتٍ جَوْهَرِيَّةً فِي تَقَدُّمِ العُلُومِ وَالمَعَارِفِ الإِنْسَانِيَّةِ عَبْرَ التَّارِيخِ. فَقَدْ بَرَعَ العُلَمَاءُ المُسْلِمُونَ فِي الرِّيَاضِيَّاتِ وَالفَلَكِ وَالطِّبِّ وَالكِيمْيَاءِ وَالفَلْسَفَةِ. أَسَّسُوا بُيُوتَ الحِكْمَةِ وَالمَكْتَبَاتِ الضَّخْمَةَ، وَتَرْجَمُوا التُّرَاثَ اليُونَانِيَّ وَالفَارِسِيَّ وَالهِنْدِيَّ، مُضِيفِينَ إِلَيْهِ اكْتِشَافَاتِهِمْ وَابْتِكَارَاتِهِمُ الأَصِيلَةَ الَّتِي أَثَّرَتْ عَلَى النَّهْضَةِ الأُورُوبِّيَّةِ."
+                        }
+                    ]
+                };
+                
+                this.encouragements = {
+                    start: [
+                        { title: "🌟 أنت قادر على التميز!", text: "القراءة مفتاح المعرفة، وأنت تملك هذا المفتاح. ابدأ رحلتك نحو التفوق!" },
+                        { title: "🚀 انطلق نحو النجاح!", text: "كل كلمة تقرأها تقربك خطوة من أهدافك. استمر وستصل!" },
+                        { title: "💪 قوتك في إصرارك!", text: "المثابرة والتدريب المستمر هما سر النجاح في القراءة." }
+                    ],
+                    progress: [
+                        { title: "🎯 أداء رائع!", text: "تقدمك ملحوظ ومستمر. استمر على هذا المنوال!" },
+                        { title: "⭐ تحسن مذهل!", text: "سرعتك في القراءة تتحسن يوماً بعد يوم. أنت على الطريق الصحيح!" },
+                        { title: "🏆 إنجاز متميز!", text: "وصلت لمستوى جديد من الإتقان. فخور بك!" }
+                    ],
+                    complete: [
+                        { title: "🎉 مبروك! أكملت النص!", text: "أداء استثنائي! أنت تتقدم بخطوات ثابتة نحو الإتقان." },
+                        { title: "✨ إنجاز رائع!", text: "قراءة ممتازة! مهاراتك تتطور بشكل مذهل." },
+                        { title: "🌟 أحسنت صنعاً!", text: "قراءة متقنة ومتميزة. استمر في هذا التفوق!" }
+                    ]
+                };
+                
                 this.currentLevel = 1;
-                this.timeTargets = [120, 60, 30]; // 2 minutes, 1 minute, 30 seconds
-                this.currentTime = this.timeTargets[0];
-                this.isRunning = false;
-                this.isPaused = false;
-                this.timer = null;
-                this.totalTime = this.timeTargets[0];
+                this.currentTextIndex = 0;
+                this.currentWordIndex = 0;
+                this.isReading = false;
                 this.startTime = null;
-                this.endTime = null;
-                this.actualReadingTime = 0;
-                this.readingRecords = this.loadRecords();
+                this.timer = null;
+                this.elapsedTime = 0;
+                this.words = [];
+                
+                // Enhanced speech synthesis properties
+                this.speechSynth = window.speechSynthesis;
+                this.currentUtterance = null;
+                this.voices = [];
+                this.isAudioReading = false;
+                this.audioWordIndex = 0;
+                this.audioTimer = null;
+                this.wordTimings = [];
+                this.selectedVoice = 'arabic-female';
+                this.currentAudio = null;
+                
+                // Progress tracking
+                this.progressData = JSON.parse(localStorage.getItem('progressData') || '[]');
+                this.chart = null;
                 
                 this.initializeElements();
-                this.bindEvents();
-                this.updateDisplay();
-                this.updateStatistics();
-                this.displayRecords();
+                this.loadStats();
+                this.setupEventListeners();
+                this.loadVoices();
+                this.updateText();
+                this.updateEncouragement('start');
+                this.initializeChart();
+                this.updateAchievements();
             }
             
             initializeElements() {
-                this.startBtn = document.getElementById('startBtn');
-                this.pauseBtn = document.getElementById('pauseBtn');
-                this.finishBtn = document.getElementById('finishBtn');
-                this.resetBtn = document.getElementById('resetBtn');
-                this.timeDisplay = document.getElementById('timeDisplay');
-                this.timerCircle = document.getElementById('timerCircle');
-                this.helpBtn = document.getElementById('helpBtn');
-                this.helpSection = document.getElementById('helpSection');
-                this.resultsSection = document.getElementById('resultsSection');
-                this.resultContent = document.getElementById('resultContent');
-                this.currentLevelDisplay = document.getElementById('currentLevel');
-                this.levelDescription = document.getElementById('levelDescription');
-                
-                // Records elements
-                this.recordsList = document.getElementById('recordsList');
-                this.clearRecordsBtn = document.getElementById('clearRecordsBtn');
-                this.exportRecordsBtn = document.getElementById('exportRecordsBtn');
-                this.totalReadingsEl = document.getElementById('totalReadings');
-                this.successfulReadingsEl = document.getElementById('successfulReadings');
-                this.averageTimeEl = document.getElementById('averageTime');
-                this.bestTimeEl = document.getElementById('bestTime');
+                this.elements = {
+                    // Level selection
+                    levelButtons: document.querySelectorAll('.level-button'),
+                    
+                    // Text and reading
+                    textSelect: document.getElementById('textSelect'),
+                    readingText: document.getElementById('readingText'),
+                    startBtn: document.getElementById('startBtn'),
+                    pauseBtn: document.getElementById('pauseBtn'),
+                    resetBtn: document.getElementById('resetBtn'),
+                    
+                    // Progress
+                    progressBar: document.getElementById('progressBar'),
+                    progressText: document.getElementById('progressText'),
+                    wordsRead: document.getElementById('wordsRead'),
+                    readingSpeed: document.getElementById('readingSpeed'),
+                    accuracy: document.getElementById('accuracy'),
+                    level: document.getElementById('level'),
+                    
+                    // Timer
+                    timerDisplay: document.getElementById('timerDisplay'),
+                    timerCircle: document.getElementById('timerCircle'),
+                    
+                    // Audio
+                    playAudioBtn: document.getElementById('playAudioBtn'),
+                    pauseAudioBtn: document.getElementById('pauseAudioBtn'),
+                    stopAudioBtn: document.getElementById('stopAudioBtn'),
+                    repeatAudioBtn: document.getElementById('repeatAudioBtn'),
+                    speedRange: document.getElementById('speedRange'),
+                    speedValue: document.getElementById('speedValue'),
+                    pitchRange: document.getElementById('pitchRange'),
+                    pitchValue: document.getElementById('pitchValue'),
+                    volumeRange: document.getElementById('volumeRange'),
+                    volumeValue: document.getElementById('volumeValue'),
+                    highlightWords: document.getElementById('highlightWords'),
+                    autoScroll: document.getElementById('autoScroll'),
+                    slowMode: document.getElementById('slowMode'),
+                    audioIndicator: document.getElementById('audioIndicator'),
+                    voiceOptions: document.querySelectorAll('.voice-option'),
+                    
+                    // Stats
+                    totalSessions: document.getElementById('totalSessions'),
+                    totalWords: document.getElementById('totalWords'),
+                    avgSpeed: document.getElementById('avgSpeed'),
+                    bestSpeed: document.getElementById('bestSpeed'),
+                    totalTime: document.getElementById('totalTime'),
+                    clearStats: document.getElementById('clearStats'),
+                    
+                    // Encouragement
+                    encouragementTitle: document.getElementById('encouragementTitle'),
+                    encouragementText: document.getElementById('encouragementText'),
+                    
+                    // Chart
+                    progressChart: document.getElementById('progressChart'),
+                    
+                    // Achievements
+                    achievementBadges: document.getElementById('achievementBadges')
+                };
             }
             
-            bindEvents() {
-                this.startBtn.addEventListener('click', () => this.startTimer());
-                this.pauseBtn.addEventListener('click', () => this.pauseTimer());
-                this.finishBtn.addEventListener('click', () => this.finishReading());
-                this.resetBtn.addEventListener('click', () => this.resetTimer());
-                this.helpBtn.addEventListener('click', () => this.toggleHelp());
-                this.clearRecordsBtn.addEventListener('click', () => this.clearRecords());
-                this.exportRecordsBtn.addEventListener('click', () => this.exportRecords());
+            setupEventListeners() {
+                // Level selection
+                this.elements.levelButtons.forEach((btn, index) => {
+                    btn.addEventListener('click', () => {
+                        this.selectLevel(index + 1);
+                    });
+                });
+                
+                // Text selection
+                this.elements.textSelect.addEventListener('change', () => {
+                    this.currentTextIndex = parseInt(this.elements.textSelect.value);
+                    this.updateText();
+                    this.reset();
+                    this.stopAudio();
+                });
+                
+                // Reading controls
+                this.elements.startBtn.addEventListener('click', () => this.startReading());
+                this.elements.pauseBtn.addEventListener('click', () => this.pauseReading());
+                this.elements.resetBtn.addEventListener('click', () => this.reset());
+                
+                // Audio controls
+                this.elements.playAudioBtn.addEventListener('click', () => this.startAudioReading());
+                this.elements.pauseAudioBtn.addEventListener('click', () => this.pauseAudio());
+                this.elements.stopAudioBtn.addEventListener('click', () => this.stopAudio());
+                this.elements.repeatAudioBtn.addEventListener('click', () => this.repeatCurrentSentence());
+                
+                // Voice selection
+                this.elements.voiceOptions.forEach(option => {
+                    option.addEventListener('click', () => {
+                        this.elements.voiceOptions.forEach(opt => opt.classList.remove('active'));
+                        option.classList.add('active');
+                        this.selectedVoice = option.dataset.voice;
+                    });
+                });
+                
+                // Audio settings
+                this.elements.speedRange.addEventListener('input', (e) => {
+                    this.elements.speedValue.textContent = e.target.value + 'x';
+                });
+                
+                this.elements.pitchRange.addEventListener('input', (e) => {
+                    this.elements.pitchValue.textContent = e.target.value;
+                });
+                
+                this.elements.volumeRange.addEventListener('input', (e) => {
+                    this.elements.volumeValue.textContent = Math.round(e.target.value * 100) + '%';
+                });
+                
+                // Stats
+                this.elements.clearStats.addEventListener('click', () => this.clearStats());
+                
+                // Keyboard shortcuts
+                document.addEventListener('keydown', (e) => {
+                    if (e.code === 'Space' && !e.target.matches('input, textarea, select')) {
+                        e.preventDefault();
+                        if (this.isReading) {
+                            this.pauseReading();
+                        } else {
+                            this.startReading();
+                        }
+                    } else if (e.code === 'Escape') {
+                        this.reset();
+                        this.stopAudio();
+                    } else if (e.code === 'KeyA' && e.ctrlKey) {
+                        e.preventDefault();
+                        if (this.isAudioReading) {
+                            this.pauseAudio();
+                        } else {
+                            this.startAudioReading();
+                        }
+                    }
+                });
+            }
+            
+            selectLevel(level) {
+                this.currentLevel = level;
+                this.currentTextIndex = 0;
+                
+                // Update UI
+                this.elements.levelButtons.forEach((btn, index) => {
+                    btn.classList.toggle('active', index + 1 === level);
+                });
+                
+                this.elements.level.textContent = level;
+                this.updateTextOptions();
+                this.updateText();
+                this.reset();
+                this.stopAudio();
+                this.updateEncouragement('start');
+            }
+            
+            updateTextOptions() {
+                const texts = this.texts[this.currentLevel];
+                this.elements.textSelect.innerHTML = '';
+                
+                texts.forEach((text, index) => {
+                    const option = document.createElement('option');
+                    option.value = index;
+                    option.textContent = text.title;
+                    this.elements.textSelect.appendChild(option);
+                });
+            }
+            
+            updateText() {
+                const currentText = this.texts[this.currentLevel][this.currentTextIndex];
+                if (!currentText) return;
+                
+                this.words = currentText.content.split(' ');
+                this.elements.readingText.innerHTML = currentText.content;
+                this.elements.readingText.className = `reading-text level-${this.currentLevel}`;
+                this.updateProgress();
+            }
+            
+            startReading() {
+                if (!this.isReading) {
+                    this.isReading = true;
+                    this.startTime = Date.now() - this.elapsedTime;
+                    this.elements.startBtn.disabled = true;
+                    this.elements.pauseBtn.disabled = false;
+                    this.startTimer();
+                    this.highlightCurrentWord();
+                }
+            }
+            
+            pauseReading() {
+                if (this.isReading) {
+                    this.isReading = false;
+                    this.elements.startBtn.disabled = false;
+                    this.elements.pauseBtn.disabled = true;
+                    clearInterval(this.timer);
+                    this.saveSession();
+                    this.updateEncouragement('progress');
+                }
+            }
+            
+            reset() {
+                this.isReading = false;
+                this.currentWordIndex = 0;
+                this.elapsedTime = 0;
+                this.startTime = null;
+                
+                this.elements.startBtn.disabled = false;
+                this.elements.pauseBtn.disabled = true;
+                
+                clearInterval(this.timer);
+                this.updateText();
+                this.updateProgress();
+                this.updateTimer();
+                this.updateTimerCircle();
             }
             
             startTimer() {
-                const studentName = document.getElementById('studentName').value.trim();
-                const nameError = document.getElementById('nameError');
-                const nameSuccess = document.getElementById('nameSuccess');
-                const welcomeName = document.getElementById('welcomeName');
-                
-                if (!studentName) {
-                    nameError.classList.remove('hidden');
-                    nameSuccess.classList.add('hidden');
-                    document.getElementById('studentName').focus();
-                    document.getElementById('studentName').classList.add('border-red-400', 'bg-red-500/20');
-                    setTimeout(() => {
-                        document.getElementById('studentName').classList.remove('border-red-400', 'bg-red-500/20');
-                    }, 3000);
-                    return;
-                }
-                
-                nameError.classList.add('hidden');
-                nameSuccess.classList.remove('hidden');
-                welcomeName.textContent = studentName;
-                
-                if (!this.isRunning) {
-                    this.isRunning = true;
-                    this.startTime = Date.now();
-                    this.startBtn.classList.add('hidden');
-                    this.pauseBtn.classList.remove('hidden');
-                    this.finishBtn.classList.remove('hidden');
+                this.timer = setInterval(() => {
+                    this.elapsedTime = Date.now() - this.startTime;
+                    this.updateTimer();
+                    this.updateTimerCircle();
+                    this.updateReadingSpeed();
                     
-                    this.timer = setInterval(() => {
-                        if (this.currentTime > 0) {
-                            this.currentTime--;
-                            this.updateDisplay();
-                        } else {
-                            this.timeUp();
+                    // Auto-advance words (simulate reading)
+                    if (Math.random() < 0.4 && this.currentWordIndex < this.words.length - 1) {
+                        this.currentWordIndex++;
+                        this.highlightCurrentWord();
+                        this.updateProgress();
+                        
+                        if (this.currentWordIndex >= this.words.length - 1) {
+                            this.completeReading();
                         }
-                    }, 1000);
-                }
-            }
-            
-            pauseTimer() {
-                if (this.isRunning) {
-                    this.isRunning = false;
-                    clearInterval(this.timer);
-                    this.startBtn.classList.remove('hidden');
-                    this.pauseBtn.classList.add('hidden');
-                    this.finishBtn.classList.add('hidden');
-                    this.startBtn.textContent = '▶️ متابعة';
-                }
-            }
-            
-            finishReading() {
-                if (this.isRunning) {
-                    this.endTime = Date.now();
-                    this.actualReadingTime = Math.floor((this.endTime - this.startTime) / 1000);
-                    this.isRunning = false;
-                    clearInterval(this.timer);
-                    this.saveRecord(true, this.actualReadingTime);
-                    this.showResults(true, this.actualReadingTime);
-                    this.advanceLevel();
-                }
-            }
-            
-            timeUp() {
-                this.endTime = Date.now();
-                this.actualReadingTime = Math.floor((this.endTime - this.startTime) / 1000);
-                this.isRunning = false;
-                clearInterval(this.timer);
-                this.saveRecord(false, this.actualReadingTime);
-                this.showResults(false, this.actualReadingTime);
-            }
-            
-            resetTimer() {
-                this.isRunning = false;
-                this.isPaused = false;
-                clearInterval(this.timer);
-                this.currentTime = this.timeTargets[this.currentLevel - 1];
-                this.totalTime = this.timeTargets[this.currentLevel - 1];
-                this.startTime = null;
-                this.endTime = null;
-                this.actualReadingTime = 0;
-                this.startBtn.classList.remove('hidden');
-                this.pauseBtn.classList.add('hidden');
-                this.finishBtn.classList.add('hidden');
-                this.startBtn.textContent = '🚀 ابدأ القراءة';
-                this.resultsSection.classList.add('hidden');
-                this.updateDisplay();
-            }
-            
-            showResults(success, actualTime) {
-                this.resultsSection.classList.remove('hidden');
-                
-                const targetTime = this.timeTargets[this.currentLevel - 1];
-                const timeDifference = actualTime - targetTime;
-                const minutes = Math.floor(actualTime / 60);
-                const seconds = actualTime % 60;
-                const timeString = `${minutes}:${seconds.toString().padStart(2, '0')}`;
-                
-                let timingMessage = '';
-                let timingClass = '';
-                
-                if (success) {
-                    if (timeDifference < 0) {
-                        const savedMinutes = Math.floor(Math.abs(timeDifference) / 60);
-                        const savedSeconds = Math.abs(timeDifference) % 60;
-                        const savedTimeString = savedMinutes > 0 ? 
-                            `${savedMinutes} دقيقة و ${savedSeconds} ثانية` : 
-                            `${savedSeconds} ثانية`;
-                        timingMessage = `⚡ ممتاز! وفرت ${savedTimeString} من الوقت المحدد`;
-                        timingClass = 'text-blue-600 bg-blue-50';
-                    } else if (timeDifference === 0) {
-                        timingMessage = `🎯 مثالي! أكملت القراءة في الوقت المحدد تماماً`;
-                        timingClass = 'text-green-600 bg-green-50';
-                    } else {
-                        timingMessage = `✅ أحسنت! أكملت القراءة بنجاح`;
-                        timingClass = 'text-green-600 bg-green-50';
                     }
-                    
-                    this.resultContent.innerHTML = `
-                        <div class="celebration">
-                            <div class="text-8xl mb-6">🎉</div>
-                            <h4 class="text-4xl font-bold text-black mb-4">أحسنت!</h4>
-                            <p class="text-black mb-6 text-lg font-semibold">لقد أكملت القراءة بنجاح!</p>
-                            <div class="grid md:grid-cols-2 gap-6 mb-6">
-                                <div class="glass-card-dark p-6 rounded-xl">
-                                    <h5 class="font-bold text-black mb-4 text-lg">📊 تفاصيل الأداء</h5>
-                                    <p class="text-black mb-2 font-semibold">الوقت المستغرق: <span class="font-bold text-blue-600">${timeString}</span></p>
-                                    <p class="text-black font-semibold">الوقت المحدد: <span class="font-bold text-orange-600">${Math.floor(targetTime/60)}:${(targetTime%60).toString().padStart(2, '0')}</span></p>
-                                </div>
-                                <div class="glass-card-dark p-6 rounded-xl border-l-4 border-green-400">
-                                    <p class="font-bold text-green-600 text-lg">${timingMessage}</p>
-                                </div>
-                            </div>
-                            <div class="glass-card-dark p-6 rounded-xl border-2 border-green-400">
-                                <p class="text-green-600 font-bold text-xl">المستوى ${this.currentLevel} مكتمل ✅</p>
-                            </div>
-                        </div>
-                    `;
-                } else {
-                    const extraMinutes = Math.floor(timeDifference / 60);
-                    const extraSeconds = timeDifference % 60;
-                    const extraTimeString = extraMinutes > 0 ? 
-                        `${extraMinutes} دقيقة و ${extraSeconds} ثانية` : 
-                        `${extraSeconds} ثانية`;
-                    
-                    this.resultContent.innerHTML = `
-                        <div class="text-6xl mb-6">⏰</div>
-                        <h4 class="text-3xl font-bold text-orange-600 mb-4">انتهى الوقت!</h4>
-                        <p class="text-black mb-6 text-lg font-semibold">لا تقلق، يمكنك المحاولة مرة أخرى</p>
-                        <div class="grid md:grid-cols-2 gap-6 mb-6">
-                            <div class="glass-card-dark p-6 rounded-xl">
-                                <h5 class="font-bold text-black mb-4 text-lg">📊 تفاصيل الأداء</h5>
-                                <p class="text-black mb-2 font-semibold">الوقت المستغرق: <span class="font-bold text-blue-600">${timeString}</span></p>
-                                <p class="text-black font-semibold">الوقت المحدد: <span class="font-bold text-orange-600">${Math.floor(targetTime/60)}:${(targetTime%60).toString().padStart(2, '0')}</span></p>
-                            </div>
-                            <div class="glass-card-dark p-6 rounded-xl border-l-4 border-red-400">
-                                <p class="text-red-600 font-bold text-lg">⏱️ تجاوزت الوقت بـ ${extraTimeString}</p>
-                            </div>
-                        </div>
-                        <div class="glass-card-dark p-6 rounded-xl border-2 border-orange-400">
-                            <p class="text-orange-600 font-bold text-xl">تذكر: التدريب يجعلك أفضل! 💪</p>
-                        </div>
-                    `;
-                }
+                }, 800);
             }
             
-            advanceLevel() {
-                if (this.currentLevel < 3) {
-                    setTimeout(() => {
-                        this.currentLevel++;
-                        this.currentTime = this.timeTargets[this.currentLevel - 1];
-                        this.totalTime = this.timeTargets[this.currentLevel - 1];
-                        this.updateLevelDisplay();
-                        this.updateDisplay();
-                        this.startBtn.textContent = '🚀 ابدأ المستوى التالي';
-                        this.startBtn.classList.remove('hidden');
-                        this.pauseBtn.classList.add('hidden');
-                        this.finishBtn.classList.add('hidden');
-                    }, 3000);
-                } else {
-                    setTimeout(() => {
-                        this.resultContent.innerHTML = `
-                            <div class="text-8xl mb-6 sparkle">🏆</div>
-                            <h4 class="text-5xl font-bold text-gradient mb-6">مبروك!</h4>
-                            <p class="text-black mb-8 text-xl font-bold">لقد أكملت جميع المستويات بنجاح!</p>
-                            <div class="glass-card-dark p-8 rounded-xl border-4 border-purple-400 glow">
-                                <p class="text-purple-600 font-bold text-2xl">أنت الآن قارئ ماهر! 🌟</p>
-                                <div class="mt-4 flex justify-center space-x-2">
-                                    <span class="text-2xl">🎉</span>
-                                    <span class="text-2xl">✨</span>
-                                    <span class="text-2xl">🎊</span>
-                                </div>
-                            </div>
-                        `;
-                    }, 3000);
-                }
-            }
-            
-            updateDisplay() {
-                const minutes = Math.floor(this.currentTime / 60);
-                const seconds = this.currentTime % 60;
-                this.timeDisplay.textContent = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+            highlightCurrentWord() {
+                const highlightedWords = this.words.map((word, index) => {
+                    if (index === this.currentWordIndex) {
+                        return `<span class="word-highlight">${word}</span>`;
+                    }
+                    return word;
+                });
                 
-                // Update circle progress
-                const progress = (this.totalTime - this.currentTime) / this.totalTime;
-                const circumference = 377; // Updated for larger circle (2 * π * 60)
+                this.elements.readingText.innerHTML = highlightedWords.join(' ');
+                
+                // Auto scroll to current word
+                if (this.elements.autoScroll.checked) {
+                    const highlightedElement = this.elements.readingText.querySelector('.word-highlight');
+                    if (highlightedElement) {
+                        highlightedElement.scrollIntoView({
+                            behavior: 'smooth',
+                            block: 'center'
+                        });
+                    }
+                }
+            }
+            
+            updateProgress() {
+                const progress = this.words.length > 0 ? (this.currentWordIndex / this.words.length) * 100 : 0;
+                this.elements.progressBar.style.width = `${progress}%`;
+                this.elements.progressText.textContent = `${this.currentWordIndex} / ${this.words.length}`;
+                this.elements.wordsRead.textContent = this.currentWordIndex;
+            }
+            
+            updateTimer() {
+                const minutes = Math.floor(this.elapsedTime / 60000);
+                const seconds = Math.floor((this.elapsedTime % 60000) / 1000);
+                this.elements.timerDisplay.textContent = 
+                    `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+            }
+            
+            updateTimerCircle() {
+                const maxTime = 600000; // 10 minutes max
+                const progress = Math.min(this.elapsedTime / maxTime, 1);
+                const circumference = 2 * Math.PI * 50; // radius = 50
                 const offset = circumference - (progress * circumference);
-                this.timerCircle.style.strokeDashoffset = offset;
-                
-                // Change color based on time remaining
-                if (this.currentTime <= 10) {
-                    this.timerCircle.style.stroke = '#ef4444'; // red
-                } else if (this.currentTime <= 30) {
-                    this.timerCircle.style.stroke = '#f59e0b'; // yellow
-                } else {
-                    this.timerCircle.style.stroke = '#3b82f6'; // blue
+                this.elements.timerCircle.style.strokeDasharray = circumference;
+                this.elements.timerCircle.style.strokeDashoffset = offset;
+            }
+            
+            updateReadingSpeed() {
+                if (this.elapsedTime > 0) {
+                    const minutes = this.elapsedTime / 60000;
+                    const speed = Math.round(this.currentWordIndex / minutes);
+                    this.elements.readingSpeed.textContent = speed || 0;
                 }
             }
             
-            updateLevelDisplay() {
-                const levels = ['الأول: دقيقتان', 'الثاني: دقيقة واحدة', 'الثالث: نصف دقيقة'];
-                const descriptions = [
-                    'اقرأ الفقرة في دقيقتين أو أقل',
-                    'اقرأ الفقرة في دقيقة واحدة أو أقل',
-                    'اقرأ الفقرة في نصف دقيقة أو أقل'
-                ];
-                
-                this.currentLevelDisplay.textContent = `المستوى ${levels[this.currentLevel - 1]}`;
-                this.levelDescription.textContent = descriptions[this.currentLevel - 1];
-                
-                // Update level indicators
-                for (let i = 1; i <= 3; i++) {
-                    const levelElement = document.getElementById(`level${i}`);
-                    if (i < this.currentLevel) {
-                        levelElement.className = 'level-indicator w-16 h-16 rounded-full bg-gradient-to-br from-green-400 to-green-600 flex items-center justify-center text-white font-bold text-xl shadow-lg';
-                        levelElement.innerHTML = '✓';
-                    } else if (i === this.currentLevel) {
-                        levelElement.className = 'level-indicator w-16 h-16 rounded-full bg-gradient-to-br from-yellow-400 to-orange-500 flex items-center justify-center text-white font-bold text-xl shadow-lg pulse active';
-                        levelElement.textContent = i;
-                    } else {
-                        levelElement.className = 'level-indicator w-16 h-16 rounded-full bg-gray-400 flex items-center justify-center text-gray-600 font-bold text-xl shadow-lg';
-                        levelElement.textContent = i;
-                    }
-                }
-            }
-            
-            toggleHelp() {
-                if (this.helpSection.classList.contains('hidden')) {
-                    this.helpSection.classList.remove('hidden');
-                    this.helpBtn.textContent = '❌ إخفاء النصائح';
-                } else {
-                    this.helpSection.classList.add('hidden');
-                    this.helpBtn.textContent = '📋 إظهار النصائح';
-                }
-            }
-            
-            // Records Management Functions
-            loadRecords() {
-                const saved = localStorage.getItem('readingRecords');
-                return saved ? JSON.parse(saved) : [];
-            }
-            
-            saveRecord(success, actualTime) {
-                const studentName = document.getElementById('studentName').value.trim();
-                
-                const record = {
-                    id: Date.now(),
-                    studentName: studentName,
-                    date: new Date().toLocaleDateString('ar-SA'),
-                    time: new Date().toLocaleTimeString('ar-SA', { hour12: false }),
-                    level: this.currentLevel,
-                    targetTime: this.timeTargets[this.currentLevel - 1],
-                    actualTime: actualTime,
-                    success: success,
-                    timeDifference: actualTime - this.timeTargets[this.currentLevel - 1]
-                };
-                
-                this.readingRecords.unshift(record);
-                localStorage.setItem('readingRecords', JSON.stringify(this.readingRecords));
-                this.updateStatistics();
-                this.displayRecords();
-            }
-            
-            clearRecords() {
-                if (confirm('هل أنت متأكد من حذف جميع التسجيلات؟ لا يمكن التراجع عن هذا الإجراء.')) {
-                    this.readingRecords = [];
-                    localStorage.removeItem('readingRecords');
-                    this.updateStatistics();
-                    this.displayRecords();
-                }
-            }
-            
-            exportRecords() {
-                if (this.readingRecords.length === 0) {
-                    alert('لا توجد تسجيلات للتصدير!');
-                    return;
-                }
-                
-                // Create Excel-compatible HTML table
-                let excelContent = `
-                    <html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40">
-                    <head>
-                        <meta charset="UTF-8">
-                        <meta http-equiv="content-type" content="application/vnd.ms-excel; charset=UTF-8">
-                        <style>
-                            .header { background-color: #4472C4; color: white; font-weight: bold; text-align: center; }
-                            .success { background-color: #E2EFDA; color: #70AD47; }
-                            .failed { background-color: #FCE4D6; color: #C55A11; }
-                            .center { text-align: center; }
-                            .right { text-align: right; }
-                            table { border-collapse: collapse; width: 100%; direction: rtl; }
-                            th, td { border: 1px solid #D0D7DE; padding: 8px; }
-                            .title { background-color: #2F5597; color: white; font-size: 16px; font-weight: bold; text-align: center; }
-                        </style>
-                    </head>
-                    <body>
-                        <table>
-                            <tr>
-                                <td colspan="9" class="title">📚 سجل القراءات التفاعلي - ${new Date().toLocaleDateString('ar-SA')}</td>
-                            </tr>
-                            <tr>
-                                <td colspan="9" style="height: 10px;"></td>
-                            </tr>
-                            <tr class="header">
-                                <th>الرقم</th>
-                                <th>اسم الطالب</th>
-                                <th>التاريخ</th>
-                                <th>الوقت</th>
-                                <th>المستوى</th>
-                                <th>الوقت المحدد</th>
-                                <th>الوقت الفعلي</th>
-                                <th>النتيجة</th>
-                                <th>الفرق الزمني</th>
-                            </tr>
-                `;
-                
-                // Sort records by date and time (newest first)
-                const sortedRecords = [...this.readingRecords].sort((a, b) => b.id - a.id);
-                
-                sortedRecords.forEach((record, index) => {
-                    const studentName = record.studentName || 'غير محدد';
-                    const targetTimeStr = this.formatTime(record.targetTime);
-                    const actualTimeStr = this.formatTime(record.actualTime);
-                    const result = record.success ? 'نجح ✅' : 'لم ينجح ❌';
-                    const resultClass = record.success ? 'success' : 'failed';
-                    
-                    let difference = '';
-                    let differenceClass = '';
-                    
-                    if (record.success && record.timeDifference < 0) {
-                        difference = `وفر ${this.formatTime(Math.abs(record.timeDifference))} ⚡`;
-                        differenceClass = 'success';
-                    } else if (record.timeDifference > 0) {
-                        difference = `تجاوز بـ ${this.formatTime(record.timeDifference)} ⏰`;
-                        differenceClass = 'failed';
-                    } else {
-                        difference = 'في الوقت المحدد 🎯';
-                        differenceClass = 'success';
-                    }
-                    
-                    const levelText = `المستوى ${record.level}`;
-                    
-                    excelContent += `
-                        <tr>
-                            <td class="center">${index + 1}</td>
-                            <td class="right"><strong>${studentName}</strong></td>
-                            <td class="center">${record.date}</td>
-                            <td class="center">${record.time}</td>
-                            <td class="center">${levelText}</td>
-                            <td class="center">${targetTimeStr}</td>
-                            <td class="center">${actualTimeStr}</td>
-                            <td class="center ${resultClass}"><strong>${result}</strong></td>
-                            <td class="center ${differenceClass}"><strong>${difference}</strong></td>
-                        </tr>
-                    `;
-                });
-                
-                // Add statistics summary
-                const total = this.readingRecords.length;
-                const successful = this.readingRecords.filter(r => r.success).length;
-                const successRate = total > 0 ? Math.round((successful / total) * 100) : 0;
-                
-                excelContent += `
-                            <tr>
-                                <td colspan="9" style="height: 10px;"></td>
-                            </tr>
-                            <tr class="header">
-                                <td colspan="9">📊 ملخص الإحصائيات</td>
-                            </tr>
-                            <tr>
-                                <td class="center"><strong>إجمالي القراءات</strong></td>
-                                <td class="center">${total}</td>
-                                <td class="center"><strong>القراءات الناجحة</strong></td>
-                                <td class="center success">${successful}</td>
-                                <td class="center"><strong>معدل النجاح</strong></td>
-                                <td class="center success"><strong>${successRate}%</strong></td>
-                                <td colspan="3" class="center"><strong>تاريخ التصدير: ${new Date().toLocaleDateString('ar-SA')} - ${new Date().toLocaleTimeString('ar-SA')}</strong></td>
-                            </tr>
-                        </table>
-                    </body>
-                    </html>
-                `;
-                
-                // Create and download Excel file
-                const blob = new Blob([excelContent], { 
-                    type: 'application/vnd.ms-excel;charset=utf-8;' 
-                });
-                
-                const link = document.createElement('a');
-                const url = URL.createObjectURL(blob);
-                link.setAttribute('href', url);
-                
-                // Create filename with current date and time
-                const now = new Date();
-                const dateStr = now.toLocaleDateString('ar-SA').replace(/\//g, '-');
-                const timeStr = now.toLocaleTimeString('ar-SA', { hour12: false }).replace(/:/g, '-');
-                
-                link.setAttribute('download', `سجل_القراءات_${dateStr}_${timeStr}.xls`);
-                link.style.visibility = 'hidden';
-                document.body.appendChild(link);
-                link.click();
-                document.body.removeChild(link);
-                
-                // Show success message
+            completeReading() {
+                this.pauseReading();
+                this.updateEncouragement('complete');
+                this.updateAchievements();
                 setTimeout(() => {
-                    alert(`✅ تم تصدير ${total} تسجيل بنجاح!\n📁 الملف: سجل_القراءات_${dateStr}_${timeStr}.xls`);
+                    const encouragement = this.encouragements.complete[Math.floor(Math.random() * this.encouragements.complete.length)];
+                    alert(`${encouragement.title}\n\n${encouragement.text}`);
                 }, 500);
             }
             
-            updateStatistics() {
-                const total = this.readingRecords.length;
-                const successful = this.readingRecords.filter(r => r.success).length;
-                
-                this.totalReadingsEl.textContent = total;
-                this.successfulReadingsEl.textContent = successful;
-                
-                if (total > 0) {
-                    const totalTime = this.readingRecords.reduce((sum, r) => sum + r.actualTime, 0);
-                    const averageTime = Math.floor(totalTime / total);
-                    this.averageTimeEl.textContent = this.formatTime(averageTime);
+            // Enhanced speech synthesis methods
+            loadVoices() {
+                const loadVoicesHandler = () => {
+                    this.voices = this.speechSynth.getVoices();
                     
-                    const successfulRecords = this.readingRecords.filter(r => r.success);
-                    if (successfulRecords.length > 0) {
-                        const bestTime = Math.min(...successfulRecords.map(r => r.actualTime));
-                        this.bestTimeEl.textContent = this.formatTime(bestTime);
-                    } else {
-                        this.bestTimeEl.textContent = '--';
+                    // Priority order for Arabic voices
+                    const arabicVoicePriority = [
+                        'Microsoft Hoda - Arabic (Saudi Arabia)',
+                        'Microsoft Naayf - Arabic (Saudi Arabia)', 
+                        'Google العربية',
+                        'Arabic Female',
+                        'Arabic Male',
+                        'ar-SA',
+                        'ar-EG',
+                        'ar-AE'
+                    ];
+                    
+                    // Find the best Arabic voice
+                    let bestArabicVoice = null;
+                    
+                    for (const priority of arabicVoicePriority) {
+                        bestArabicVoice = this.voices.find(voice => 
+                            voice.name.includes(priority) || 
+                            voice.lang.includes(priority) ||
+                            voice.name.toLowerCase().includes('arabic') ||
+                            voice.lang.toLowerCase().includes('ar')
+                        );
+                        if (bestArabicVoice) break;
                     }
-                } else {
-                    this.averageTimeEl.textContent = '0:00';
-                    this.bestTimeEl.textContent = '--';
-                }
+                    
+                    // Filter all Arabic voices
+                    const arabicVoices = this.voices.filter(voice => 
+                        voice.lang.includes('ar') || 
+                        voice.name.toLowerCase().includes('arabic') ||
+                        voice.lang.includes('AR') ||
+                        voice.name.includes('العربية') ||
+                        voice.lang.includes('sa') ||
+                        voice.lang.includes('eg')
+                    );
+                    
+                    this.voices = arabicVoices.length > 0 ? arabicVoices : this.voices;
+                    this.bestArabicVoice = bestArabicVoice;
+                    
+                    console.log('Available Arabic voices:', arabicVoices.map(v => `${v.name} (${v.lang})`));
+                    console.log('Best Arabic voice selected:', bestArabicVoice?.name);
+                };
+                
+                // Load voices with retry mechanism
+                const tryLoadVoices = () => {
+                    if (this.speechSynth.getVoices().length > 0) {
+                        loadVoicesHandler();
+                    } else {
+                        // Retry after a short delay
+                        setTimeout(tryLoadVoices, 100);
+                    }
+                };
+                
+                tryLoadVoices();
+                this.speechSynth.addEventListener('voiceschanged', loadVoicesHandler);
             }
             
-            displayRecords() {
-                if (this.readingRecords.length === 0) {
-                    this.recordsList.innerHTML = `
-                        <div class="text-center text-black py-8">
-                            📚 لا توجد تسجيلات بعد. ابدأ القراءة لحفظ أول تسجيل!
-                        </div>
-                    `;
+            startAudioReading() {
+                // Try ResponsiveVoice first for better Arabic pronunciation
+                if (this.tryResponsiveVoice()) {
                     return;
                 }
                 
-                this.recordsList.innerHTML = this.readingRecords.map(record => {
-                    const targetTimeStr = this.formatTime(record.targetTime);
-                    const actualTimeStr = this.formatTime(record.actualTime);
-                    const statusIcon = record.success ? '✅' : '❌';
-                    const statusText = record.success ? 'نجح' : 'لم ينجح';
-                    const statusColor = record.success ? 'text-green-300' : 'text-red-300';
-                    const studentName = record.studentName || 'غير محدد';
-                    
-                    let timeDifferenceText = '';
-                    let timeDifferenceClass = '';
-                    
-                    if (record.success && record.timeDifference < 0) {
-                        timeDifferenceText = `وفر ${this.formatTime(Math.abs(record.timeDifference))}`;
-                        timeDifferenceClass = 'text-blue-300';
-                    } else if (record.timeDifference > 0) {
-                        timeDifferenceText = `تجاوز بـ ${this.formatTime(record.timeDifference)}`;
-                        timeDifferenceClass = 'text-red-300';
-                    } else {
-                        timeDifferenceText = 'في الوقت المحدد';
-                        timeDifferenceClass = 'text-green-300';
-                    }
-                    
-                    return `
-                        <div class="record-card rounded-xl p-6">
-                            <div class="flex justify-between items-start mb-4">
-                                <div class="flex items-center space-x-3 space-x-reverse">
-                                    <span class="text-2xl">${statusIcon}</span>
-                                    <div>
-                                        <span class="font-bold ${statusColor} text-lg">${statusText}</span>
-                                        <div class="text-black/70 text-sm font-semibold">المستوى ${record.level}</div>
-                                    </div>
-                                </div>
-                                <div class="text-black/70 text-sm text-left font-semibold">
-                                    <div>${record.date}</div>
-                                    <div>${record.time}</div>
-                                </div>
-                            </div>
-                            <div class="mb-4">
-                                <div class="flex items-center space-x-2 space-x-reverse">
-                                    <span class="text-black/70 text-sm font-semibold">👤 الطالب:</span>
-                                    <span class="font-bold text-black text-lg">${studentName}</span>
-                                </div>
-                            </div>
-                            <div class="grid md:grid-cols-3 gap-4 text-sm">
-                                <div class="text-center">
-                                    <div class="text-black/70 mb-1 font-semibold">الوقت المحدد</div>
-                                    <div class="font-bold text-black text-lg">${targetTimeStr}</div>
-                                </div>
-                                <div class="text-center">
-                                    <div class="text-black/70 mb-1 font-semibold">الوقت الفعلي</div>
-                                    <div class="font-bold text-black text-lg">${actualTimeStr}</div>
-                                </div>
-                                <div class="text-center">
-                                    <div class="text-black/70 mb-1 font-semibold">النتيجة</div>
-                                    <div class="font-bold ${timeDifferenceClass} text-lg">${timeDifferenceText}</div>
-                                </div>
-                            </div>
-                        </div>
-                    `;
-                }).join('');
+                // Fallback to enhanced speech synthesis
+                this.speechSynth.cancel();
+                
+                const currentText = this.texts[this.currentLevel][this.currentTextIndex];
+                if (!currentText) return;
+                
+                this.words = currentText.content.split(' ');
+                this.audioWordIndex = 0;
+                this.isAudioReading = true;
+                this.wordTimings = [];
+                
+                this.elements.playAudioBtn.disabled = true;
+                this.elements.pauseAudioBtn.disabled = false;
+                this.elements.audioIndicator.classList.remove('hidden');
+                
+                this.speakTextEnhanced();
             }
             
-            formatTime(seconds) {
-                const minutes = Math.floor(seconds / 60);
-                const remainingSeconds = seconds % 60;
-                return `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`;
+            tryResponsiveVoice() {
+                // Use ResponsiveVoice for better Arabic pronunciation if available
+                if (typeof responsiveVoice !== 'undefined' && responsiveVoice.voiceSupport()) {
+                    const currentText = this.texts[this.currentLevel][this.currentTextIndex];
+                    if (!currentText) return false;
+                    
+                    const options = {
+                        rate: parseFloat(this.elements.speedRange.value),
+                        pitch: parseFloat(this.elements.pitchRange.value),
+                        volume: parseFloat(this.elements.volumeRange.value),
+                        onstart: () => {
+                            this.isAudioReading = true;
+                            this.elements.playAudioBtn.disabled = true;
+                            this.elements.pauseAudioBtn.disabled = false;
+                            this.elements.audioIndicator.classList.remove('hidden');
+                            if (this.elements.highlightWords.checked) {
+                                this.startWordHighlighting();
+                            }
+                        },
+                        onend: () => {
+                            this.stopAudio();
+                        }
+                    };
+                    
+                    // Choose voice based on selection
+                    let voiceName = "Arabic Female";
+                    if (this.selectedVoice === 'arabic-male') {
+                        voiceName = "Arabic Male";
+                    }
+                    
+                    // Apply slow mode if enabled
+                    if (this.elements.slowMode.checked) {
+                        options.rate = Math.max(0.3, options.rate * 0.6);
+                    }
+                    
+                    responsiveVoice.speak(currentText.content, voiceName, options);
+                    return true;
+                }
+                return false;
+            }
+            
+            speakTextEnhanced() {
+                const currentText = this.texts[this.currentLevel][this.currentTextIndex];
+                if (!currentText || !this.isAudioReading) return;
+                
+                this.currentUtterance = new SpeechSynthesisUtterance(currentText.content);
+                
+                // Set voice - prefer Arabic voices
+                if (this.voices.length > 0) {
+                    const bestVoice = this.bestArabicVoice || this.voices.find(voice => 
+                        voice.lang.includes('ar') || voice.name.toLowerCase().includes('arabic')
+                    ) || this.voices[0];
+                    
+                    this.currentUtterance.voice = bestVoice;
+                    console.log('Using voice:', bestVoice.name, bestVoice.lang);
+                }
+                
+                // Set speech parameters
+                let rate = parseFloat(this.elements.speedRange.value);
+                if (this.elements.slowMode.checked) {
+                    rate = Math.max(0.3, rate * 0.6);
+                }
+                
+                this.currentUtterance.rate = rate;
+                this.currentUtterance.pitch = parseFloat(this.elements.pitchRange.value);
+                this.currentUtterance.volume = parseFloat(this.elements.volumeRange.value);
+                this.currentUtterance.lang = 'ar-SA'; // Force Arabic language
+                
+                // Highlight words during speech
+                if (this.elements.highlightWords.checked) {
+                    this.startWordHighlighting();
+                }
+                
+                this.currentUtterance.onend = () => {
+                    this.stopAudio();
+                };
+                
+                this.currentUtterance.onerror = (event) => {
+                    console.error('Speech synthesis error:', event);
+                    this.stopAudio();
+                };
+                
+                // Start speaking
+                this.speechSynth.speak(this.currentUtterance);
+            }
+            
+            startWordHighlighting() {
+                // Estimate word timing based on speech rate
+                const baseWordsPerSecond = 2.5;
+                const rate = this.elements.slowMode.checked ? 
+                    parseFloat(this.elements.speedRange.value) * 0.6 : 
+                    parseFloat(this.elements.speedRange.value);
+                const wordsPerSecond = baseWordsPerSecond * rate;
+                const wordInterval = 1000 / wordsPerSecond;
+                
+                this.audioWordIndex = 0;
+                this.audioTimer = setInterval(() => {
+                    if (this.audioWordIndex < this.words.length && this.isAudioReading) {
+                        this.highlightAudioWord(this.audioWordIndex);
+                        this.audioWordIndex++;
+                    } else {
+                        clearInterval(this.audioTimer);
+                    }
+                }, wordInterval);
+            }
+            
+            highlightAudioWord(wordIndex) {
+                const highlightedWords = this.words.map((word, index) => {
+                    if (index === wordIndex) {
+                        return `<span class="word-highlight">${word}</span>`;
+                    }
+                    return word;
+                });
+                
+                this.elements.readingText.innerHTML = highlightedWords.join(' ');
+                
+                // Auto scroll if enabled
+                if (this.elements.autoScroll.checked) {
+                    const highlightedElement = this.elements.readingText.querySelector('.word-highlight');
+                    if (highlightedElement) {
+                        highlightedElement.scrollIntoView({
+                            behavior: 'smooth',
+                            block: 'center'
+                        });
+                    }
+                }
+            }
+            
+            pauseAudio() {
+                this.isAudioReading = false;
+                
+                if (typeof responsiveVoice !== 'undefined') {
+                    responsiveVoice.pause();
+                } else {
+                    this.speechSynth.pause();
+                }
+                
+                clearInterval(this.audioTimer);
+                
+                this.elements.playAudioBtn.disabled = false;
+                this.elements.pauseAudioBtn.disabled = true;
+                this.elements.audioIndicator.classList.add('hidden');
+            }
+            
+            stopAudio() {
+                this.isAudioReading = false;
+                
+                if (typeof responsiveVoice !== 'undefined') {
+                    responsiveVoice.cancel();
+                } else {
+                    this.speechSynth.cancel();
+                }
+                
+                clearInterval(this.audioTimer);
+                this.audioWordIndex = 0;
+                
+                this.elements.playAudioBtn.disabled = false;
+                this.elements.pauseAudioBtn.disabled = true;
+                this.elements.audioIndicator.classList.add('hidden');
+                
+                // Remove highlighting
+                this.updateText();
+            }
+            
+            repeatCurrentSentence() {
+                // Find current sentence based on highlighted word
+                const currentText = this.texts[this.currentLevel][this.currentTextIndex];
+                if (!currentText) return;
+                
+                const sentences = currentText.content.split(/[.!?]/);
+                let currentSentence = sentences[0];
+                
+                // Simple sentence detection - could be enhanced
+                if (this.audioWordIndex > 0) {
+                    const wordsUpToCurrent = this.words.slice(0, this.audioWordIndex).join(' ');
+                    for (let i = 0; i < sentences.length; i++) {
+                        if (sentences[i].includes(wordsUpToCurrent.slice(-20))) {
+                            currentSentence = sentences[i];
+                            break;
+                        }
+                    }
+                }
+                
+                // Speak the current sentence
+                if (typeof responsiveVoice !== 'undefined') {
+                    const options = {
+                        rate: parseFloat(this.elements.speedRange.value),
+                        pitch: parseFloat(this.elements.pitchRange.value),
+                        volume: parseFloat(this.elements.volumeRange.value)
+                    };
+                    
+                    if (this.elements.slowMode.checked) {
+                        options.rate = Math.max(0.3, options.rate * 0.6);
+                    }
+                    
+                    responsiveVoice.speak(currentSentence, "Arabic Female", options);
+                } else {
+                    const utterance = new SpeechSynthesisUtterance(currentSentence);
+                    utterance.lang = 'ar-SA';
+                    utterance.rate = this.elements.slowMode.checked ? 
+                        parseFloat(this.elements.speedRange.value) * 0.6 : 
+                        parseFloat(this.elements.speedRange.value);
+                    utterance.pitch = parseFloat(this.elements.pitchRange.value);
+                    utterance.volume = parseFloat(this.elements.volumeRange.value);
+                    
+                    if (this.bestArabicVoice) {
+                        utterance.voice = this.bestArabicVoice;
+                    }
+                    
+                    this.speechSynth.speak(utterance);
+                }
+            }
+            
+            // Statistics and progress tracking
+            saveSession() {
+                const stats = this.getStats();
+                const minutes = this.elapsedTime / 60000;
+                const speed = minutes > 0 ? Math.round(this.currentWordIndex / minutes) : 0;
+                
+                stats.totalSessions++;
+                stats.totalWords += this.currentWordIndex;
+                stats.totalTime += Math.round(minutes);
+                stats.speeds.push(speed);
+                stats.bestSpeed = Math.max(stats.bestSpeed, speed);
+                
+                // Add to progress data for chart
+                this.progressData.push({
+                    date: new Date().toLocaleDateString('ar-SA'),
+                    speed: speed,
+                    words: this.currentWordIndex,
+                    level: this.currentLevel,
+                    accuracy: Math.min(100, Math.max(80, 100 - (this.elapsedTime / 1000 - this.currentWordIndex) * 2))
+                });
+                
+                // Keep only last 30 sessions
+                if (this.progressData.length > 30) {
+                    this.progressData = this.progressData.slice(-30);
+                }
+                
+                localStorage.setItem('readingStats', JSON.stringify(stats));
+                localStorage.setItem('progressData', JSON.stringify(this.progressData));
+                this.updateStatsDisplay();
+                this.updateChart();
+            }
+            
+            getStats() {
+                const defaultStats = {
+                    totalSessions: 0,
+                    totalWords: 0,
+                    totalTime: 0,
+                    speeds: [],
+                    bestSpeed: 0
+                };
+                
+                const saved = localStorage.getItem('readingStats');
+                return saved ? JSON.parse(saved) : defaultStats;
+            }
+            
+            loadStats() {
+                this.updateStatsDisplay();
+            }
+            
+            updateStatsDisplay() {
+                const stats = this.getStats();
+                const avgSpeed = stats.speeds.length > 0 
+                    ? Math.round(stats.speeds.reduce((a, b) => a + b, 0) / stats.speeds.length)
+                    : 0;
+                
+                this.elements.totalSessions.textContent = stats.totalSessions;
+                this.elements.totalWords.textContent = stats.totalWords.toLocaleString('ar-SA');
+                this.elements.totalTime.textContent = stats.totalTime + 'د';
+                this.elements.avgSpeed.textContent = avgSpeed;
+                this.elements.bestSpeed.textContent = stats.bestSpeed;
+                
+                // Update accuracy (simulated based on performance)
+                const accuracy = Math.min(100, Math.max(85, 95 + (avgSpeed - 100) * 0.1));
+                this.elements.accuracy.textContent = Math.round(accuracy) + '%';
+            }
+            
+            clearStats() {
+                if (confirm('هل أنت متأكد من مسح جميع الإحصائيات؟ لن يمكن استرداد هذه البيانات.')) {
+                    localStorage.removeItem('readingStats');
+                    localStorage.removeItem('progressData');
+                    this.progressData = [];
+                    this.updateStatsDisplay();
+                    this.updateChart();
+                    this.updateAchievements();
+                    alert('تم مسح جميع الإحصائيات بنجاح! 🗑️');
+                }
+            }
+            
+            // Encouragement system
+            updateEncouragement(type) {
+                const encouragements = this.encouragements[type];
+                const randomEncouragement = encouragements[Math.floor(Math.random() * encouragements.length)];
+                
+                this.elements.encouragementTitle.textContent = randomEncouragement.title;
+                this.elements.encouragementText.textContent = randomEncouragement.text;
+            }
+            
+            // Progress chart
+            initializeChart() {
+                const ctx = this.elements.progressChart.getContext('2d');
+                
+                this.chart = new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: [],
+                        datasets: [{
+                            label: 'سرعة القراءة (كلمة/دقيقة)',
+                            data: [],
+                            borderColor: '#667eea',
+                            backgroundColor: 'rgba(102, 126, 234, 0.1)',
+                            borderWidth: 3,
+                            fill: true,
+                            tension: 0.4,
+                            pointBackgroundColor: '#667eea',
+                            pointBorderColor: '#ffffff',
+                            pointBorderWidth: 2,
+                            pointRadius: 6
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                labels: {
+                                    font: {
+                                        family: 'Cairo',
+                                        size: 14,
+                                        weight: 'bold'
+                                    }
+                                }
+                            }
+                        },
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                title: {
+                                    display: true,
+                                    text: 'كلمة/دقيقة',
+                                    font: {
+                                        family: 'Cairo',
+                                        size: 12,
+                                        weight: 'bold'
+                                    }
+                                }
+                            },
+                            x: {
+                                title: {
+                                    display: true,
+                                    text: 'الجلسات',
+                                    font: {
+                                        family: 'Cairo',
+                                        size: 12,
+                                        weight: 'bold'
+                                    }
+                                }
+                            }
+                        }
+                    }
+                });
+                
+                this.updateChart();
+            }
+            
+            updateChart() {
+                if (!this.chart) return;
+                
+                const labels = this.progressData.map((_, index) => `جلسة ${index + 1}`);
+                const speeds = this.progressData.map(session => session.speed);
+                
+                this.chart.data.labels = labels;
+                this.chart.data.datasets[0].data = speeds;
+                this.chart.update();
+            }
+            
+            // Achievement system
+            updateAchievements() {
+                const stats = this.getStats();
+                const achievements = [];
+                
+                // Session-based achievements
+                if (stats.totalSessions >= 1) achievements.push({ icon: '🎯', title: 'أول خطوة', desc: 'أكملت جلستك الأولى' });
+                if (stats.totalSessions >= 5) achievements.push({ icon: '🔥', title: 'مثابر', desc: '5 جلسات مكتملة' });
+                if (stats.totalSessions >= 10) achievements.push({ icon: '💪', title: 'قوي الإرادة', desc: '10 جلسات مكتملة' });
+                if (stats.totalSessions >= 25) achievements.push({ icon: '🏆', title: 'بطل القراءة', desc: '25 جلسة مكتملة' });
+                
+                // Speed-based achievements
+                if (stats.bestSpeed >= 50) achievements.push({ icon: '⚡', title: 'سريع', desc: 'وصلت لـ 50 كلمة/دقيقة' });
+                if (stats.bestSpeed >= 100) achievements.push({ icon: '🚀', title: 'فائق السرعة', desc: 'وصلت لـ 100 كلمة/دقيقة' });
+                if (stats.bestSpeed >= 150) achievements.push({ icon: '⭐', title: 'نجم القراءة', desc: 'وصلت لـ 150 كلمة/دقيقة' });
+                
+                // Word-based achievements
+                if (stats.totalWords >= 100) achievements.push({ icon: '📚', title: 'قارئ نشط', desc: 'قرأت 100 كلمة' });
+                if (stats.totalWords >= 500) achievements.push({ icon: '🎓', title: 'طالب متميز', desc: 'قرأت 500 كلمة' });
+                if (stats.totalWords >= 1000) achievements.push({ icon: '👑', title: 'ملك القراءة', desc: 'قرأت 1000 كلمة' });
+                
+                // Time-based achievements
+                if (stats.totalTime >= 30) achievements.push({ icon: '⏰', title: 'مخصص للوقت', desc: '30 دقيقة من القراءة' });
+                if (stats.totalTime >= 60) achievements.push({ icon: '🕐', title: 'ساعة كاملة', desc: 'ساعة من القراءة' });
+                
+                this.displayAchievements(achievements);
+            }
+            
+            displayAchievements(achievements) {
+                this.elements.achievementBadges.innerHTML = '';
+                
+                if (achievements.length === 0) {
+                    this.elements.achievementBadges.innerHTML = '<p class="text-gray-500 text-center col-span-2">ابدأ القراءة لكسب الإنجازات! 🎯</p>';
+                    return;
+                }
+                
+                achievements.forEach(achievement => {
+                    const badge = document.createElement('div');
+                    badge.className = 'bg-gradient-to-r from-yellow-400 to-orange-500 text-white p-3 rounded-xl text-center transform hover:scale-105 transition-all';
+                    badge.innerHTML = `
+                        <div class="text-2xl mb-1">${achievement.icon}</div>
+                        <div class="font-bold text-sm">${achievement.title}</div>
+                        <div class="text-xs opacity-90">${achievement.desc}</div>
+                    `;
+                    this.elements.achievementBadges.appendChild(badge);
+                });
             }
         }
         
-        // Initialize the reading tracker when page loads
+        // Initialize the platform when the page loads
         document.addEventListener('DOMContentLoaded', () => {
-            new ReadingTracker();
+            new SmartReadingPlatform();
         });
     </script>
-<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'975e2671f623d5f6',t:'MTc1NjMyNDc3NS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'975ea950b13d3415',t:'MTc1NjMzMDEzNS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
