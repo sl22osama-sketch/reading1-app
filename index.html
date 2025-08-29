@@ -6,375 +6,106 @@
     <title>منصة القراءة الذكية - تطوير مهارات القراءة</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <!-- ResponsiveVoice for better Arabic pronunciation -->
-    <script src="https://code.responsivevoice.org/responsivevoice.js?key=FREE"></script>
     <link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Noto+Sans+Arabic:wght@300;400;500;600;700;800&family=Cairo:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
     <style>
-        * {
-            box-sizing: border-box;
-        }
-        
-        body {
-            font-family: 'Cairo', 'Noto Sans Arabic', sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 25%, #f093fb 50%, #f5576c 75%, #4facfe 100%);
-            min-height: 100vh;
-            position: relative;
-            overflow-x: hidden;
-        }
-        
-        body::before {
-            content: '';
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: 
-                radial-gradient(circle at 20% 80%, rgba(102, 126, 234, 0.4) 0%, transparent 50%),
-                radial-gradient(circle at 80% 20%, rgba(245, 87, 108, 0.4) 0%, transparent 50%),
-                radial-gradient(circle at 40% 40%, rgba(79, 172, 254, 0.3) 0%, transparent 50%);
-            pointer-events: none;
-            z-index: -1;
-            animation: backgroundMove 20s ease-in-out infinite;
-        }
-        
-        @keyframes backgroundMove {
-            0%, 100% { transform: translateX(0) translateY(0); }
-            25% { transform: translateX(-20px) translateY(-10px); }
-            50% { transform: translateX(20px) translateY(10px); }
-            75% { transform: translateX(-10px) translateY(20px); }
-        }
-        
-        .glass-card {
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(20px);
-            border: 2px solid rgba(255, 255, 255, 0.9);
-            box-shadow: 
-                0 20px 60px rgba(0, 0, 0, 0.1),
-                0 8px 25px rgba(0, 0, 0, 0.08),
-                inset 0 1px 0 rgba(255, 255, 255, 0.6);
-        }
-        
-        .glass-card-dark {
-            background: rgba(255, 255, 255, 0.85);
-            backdrop-filter: blur(25px);
-            border: 2px solid rgba(255, 255, 255, 0.8);
-            box-shadow: 
-                0 15px 45px rgba(0, 0, 0, 0.12),
-                inset 0 1px 0 rgba(255, 255, 255, 0.5);
-        }
-        
-        .reading-text {
-            line-height: 2.8;
-            font-size: 1.75rem;
-            font-weight: 500;
-            color: #1a202c;
-            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-            letter-spacing: 1px;
-            word-spacing: 6px;
-            font-family: 'Amiri', 'Noto Sans Arabic', serif;
-            text-align: justify;
-            padding: 2rem;
-        }
-        
-        .level-1 { font-size: 1.5rem; line-height: 2.5; }
-        .level-2 { font-size: 1.65rem; line-height: 2.6; }
-        .level-3 { font-size: 1.75rem; line-height: 2.8; }
-        .level-4 { font-size: 1.85rem; line-height: 3; }
-        
-        .timer-circle {
-            stroke-dasharray: 283;
-            stroke-dashoffset: 283;
-            transition: stroke-dashoffset 1s linear;
-            filter: drop-shadow(0 0 12px rgba(59, 130, 246, 0.6));
-        }
-        
-        .timer-container {
-            background: linear-gradient(145deg, rgba(255, 255, 255, 0.4), rgba(255, 255, 255, 0.2));
-            backdrop-filter: blur(25px);
-            border: 3px solid rgba(255, 255, 255, 0.4);
-            box-shadow: 
-                0 15px 45px rgba(0, 0, 0, 0.15),
-                inset 0 2px 0 rgba(255, 255, 255, 0.5);
-        }
-        
-        .btn-gradient {
-            background: linear-gradient(145deg, #667eea, #764ba2);
-            border: none;
-            position: relative;
-            overflow: hidden;
-            transition: all 0.4s ease;
-            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
-            font-weight: 700;
-            transform: translateY(0);
-        }
-        
-        .btn-gradient:hover {
-            transform: translateY(-4px);
-            box-shadow: 0 15px 40px rgba(102, 126, 234, 0.6);
-            background: linear-gradient(145deg, #5a67d8, #6b46c1);
-        }
-        
-        .btn-gradient::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: -100%;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
-            transition: left 0.6s;
-        }
-        
-        .btn-gradient:hover::before {
-            left: 100%;
-        }
-        
-        .btn-success {
-            background: linear-gradient(145deg, #48bb78, #38a169);
-            box-shadow: 0 8px 25px rgba(72, 187, 120, 0.4);
-        }
-        
-        .btn-success:hover {
-            transform: translateY(-4px);
-            box-shadow: 0 15px 40px rgba(72, 187, 120, 0.6);
-            background: linear-gradient(145deg, #38a169, #2f855a);
-        }
-        
-        .btn-danger {
-            background: linear-gradient(145deg, #f56565, #e53e3e);
-            box-shadow: 0 8px 25px rgba(245, 101, 101, 0.4);
-        }
-        
-        .btn-danger:hover {
-            transform: translateY(-4px);
-            box-shadow: 0 15px 40px rgba(245, 101, 101, 0.6);
-        }
-        
-        .btn-warning {
-            background: linear-gradient(145deg, #ed8936, #dd6b20);
-            box-shadow: 0 8px 25px rgba(237, 137, 54, 0.4);
-        }
-        
-        .btn-warning:hover {
-            transform: translateY(-4px);
-            box-shadow: 0 15px 40px rgba(237, 137, 54, 0.6);
-        }
-        
-        .progress-bar {
-            background: linear-gradient(90deg, #48bb78, #38a169, #2f855a);
-            transition: width 0.5s ease;
-            box-shadow: 0 4px 15px rgba(72, 187, 120, 0.4);
-            position: relative;
-            overflow: hidden;
-        }
-        
-        .progress-bar::after {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: -100%;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
-            animation: progressShine 2s infinite;
-        }
-        
-        @keyframes progressShine {
-            0% { left: -100%; }
-            100% { left: 100%; }
-        }
-        
-        .word-highlight {
-            background: linear-gradient(120deg, #f093fb, #f5576c);
-            padding: 4px 12px;
-            border-radius: 12px;
-            color: white;
-            font-weight: 800;
-            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
-            animation: wordPulse 1.2s infinite;
-            box-shadow: 0 4px 15px rgba(240, 147, 251, 0.5);
-        }
-        
-        @keyframes wordPulse {
-            0%, 100% { transform: scale(1); box-shadow: 0 4px 15px rgba(240, 147, 251, 0.5); }
-            50% { transform: scale(1.08); box-shadow: 0 8px 25px rgba(240, 147, 251, 0.7); }
-        }
-        
-        .stats-card {
-            background: linear-gradient(145deg, rgba(255, 255, 255, 0.95), rgba(255, 255, 255, 0.8));
-            backdrop-filter: blur(25px);
-            border: 2px solid rgba(255, 255, 255, 0.9);
-            transition: all 0.4s ease;
-            position: relative;
-            overflow: hidden;
-        }
-        
-        .stats-card::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: -100%;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
-            transition: left 0.6s;
-        }
-        
-        .stats-card:hover {
-            transform: translateY(-8px);
-            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.15);
-        }
-        
-        .stats-card:hover::before {
-            left: 100%;
-        }
-        
-        .floating-animation {
-            animation: float 4s ease-in-out infinite;
-        }
-        
-        @keyframes float {
-            0%, 100% { transform: translateY(0px) rotate(0deg); }
-            25% { transform: translateY(-8px) rotate(1deg); }
-            50% { transform: translateY(-15px) rotate(0deg); }
-            75% { transform: translateY(-8px) rotate(-1deg); }
-        }
-        
-        .level-badge {
-            background: linear-gradient(145deg, #667eea, #764ba2);
-            color: white;
-            padding: 8px 16px;
-            border-radius: 25px;
-            font-weight: 700;
-            font-size: 0.9rem;
-            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
-            animation: badgeGlow 2s ease-in-out infinite alternate;
-        }
-        
-        @keyframes badgeGlow {
-            from { box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3); }
-            to { box-shadow: 0 6px 20px rgba(102, 126, 234, 0.5); }
-        }
-        
-        .encouragement-card {
-            background: linear-gradient(145deg, #f093fb, #f5576c);
-            color: white;
-            border-radius: 20px;
-            padding: 1.5rem;
-            text-align: center;
-            font-weight: 600;
-            box-shadow: 0 10px 30px rgba(240, 147, 251, 0.4);
-            animation: encouragementPulse 3s ease-in-out infinite;
-        }
-        
-        @keyframes encouragementPulse {
-            0%, 100% { transform: scale(1); }
-            50% { transform: scale(1.02); }
-        }
-        
-        .audio-wave {
-            display: inline-block;
-            width: 4px;
-            height: 20px;
-            background: linear-gradient(to top, #48bb78, #38a169);
-            margin: 0 2px;
-            border-radius: 2px;
-            animation: audioWave 1.5s ease-in-out infinite;
-        }
-        
-        .audio-wave:nth-child(2) { animation-delay: 0.1s; }
-        .audio-wave:nth-child(3) { animation-delay: 0.2s; }
-        .audio-wave:nth-child(4) { animation-delay: 0.3s; }
-        .audio-wave:nth-child(5) { animation-delay: 0.4s; }
-        
-        @keyframes audioWave {
-            0%, 100% { height: 20px; }
-            50% { height: 40px; }
-        }
-        
-        .level-selector {
-            background: rgba(255, 255, 255, 0.9);
-            backdrop-filter: blur(15px);
-            border: 2px solid rgba(255, 255, 255, 0.8);
-            border-radius: 15px;
-            padding: 1rem;
-            margin-bottom: 2rem;
-        }
-        
-        .level-button {
-            background: linear-gradient(145deg, rgba(255, 255, 255, 0.8), rgba(255, 255, 255, 0.6));
-            border: 2px solid rgba(102, 126, 234, 0.3);
-            border-radius: 12px;
-            padding: 1rem;
-            margin: 0.5rem;
-            transition: all 0.3s ease;
-            cursor: pointer;
-        }
-        
-        .level-button:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
-            border-color: rgba(102, 126, 234, 0.6);
-        }
-        
-        .level-button.active {
-            background: linear-gradient(145deg, #667eea, #764ba2);
-            color: white;
-            border-color: #667eea;
-            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.5);
-        }
-        
-        .progress-chart {
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(20px);
-            border-radius: 20px;
-            padding: 2rem;
-            margin-top: 2rem;
-        }
-        
-        .voice-selector {
-            background: rgba(255, 255, 255, 0.9);
-            backdrop-filter: blur(15px);
-            border: 2px solid rgba(102, 126, 234, 0.3);
-            border-radius: 12px;
-            padding: 1rem;
-            margin-top: 1rem;
-        }
-        
-        .audio-quality-indicator {
-            display: inline-flex;
-            align-items: center;
-            background: linear-gradient(145deg, #48bb78, #38a169);
-            color: white;
-            padding: 4px 12px;
-            border-radius: 20px;
-            font-size: 0.8rem;
-            font-weight: bold;
-            margin-right: 10px;
-        }
-        
-        .phonetic-helper {
-            background: rgba(255, 255, 255, 0.9);
-            border: 2px solid rgba(102, 126, 234, 0.3);
-            border-radius: 12px;
-            padding: 1rem;
-            margin-top: 1rem;
-            font-size: 0.9rem;
-            color: #4a5568;
-        }
+        *{box-sizing:border-box}
+        body{
+            font-family:'Cairo','Noto Sans Arabic',sans-serif;
+            background:linear-gradient(135deg,#1e3a8a 0%,#1e40af 20%,#3b82f6 40%,#06b6d4 60%,#0891b2 80%,#1e3a8a 100%);
+            background-size:300% 300%;
+            animation:gradientShift 20s ease infinite;
+            min-height:100vh;position:relative;overflow-x:hidden}
+        @keyframes gradientShift{0%{background-position:0% 50%}25%{background-position:100% 50%}50%{background-position:100% 100%}75%{background-position:0% 100%}100%{background-position:0% 50%}}
+        body::before{content:'';position:fixed;top:0;left:0;width:100%;height:100%;background:
+                radial-gradient(circle at 25% 25%, rgba(255,255,255,.15) 0%, transparent 50%),
+                radial-gradient(circle at 75% 75%, rgba(255,255,255,.1) 0%, transparent 50%),
+                radial-gradient(circle at 50% 10%, rgba(102,126,234,.2) 0%, transparent 40%),
+                radial-gradient(circle at 10% 90%, rgba(245,87,108,.15) 0%, transparent 40%),
+                radial-gradient(circle at 90% 10%, rgba(79,172,254,.15) 0%, transparent 40%),
+                linear-gradient(45deg, rgba(255,255,255,.05) 0%, transparent 100%);
+            pointer-events:none;z-index:-1;animation:backgroundMove 30s ease-in-out infinite}
+        @keyframes backgroundMove{0%,100%{transform:translateX(0) translateY(0)}25%{transform:translateX(-20px) translateY(-10px)}50%{transform:translateX(20px) translateY(10px)}75%{transform:translateX(-10px) translateY(20px)}}
+        .glass-card{background:rgba(255,255,255,.95);backdrop-filter:blur(20px);border:2px solid rgba(255,255,255,.8);box-shadow:0 20px 60px rgba(0,0,0,.15),0 8px 25px rgba(0,0,0,.1),inset 0 1px 0 rgba(255,255,255,.9);position:relative;overflow:hidden}
+        .glass-card::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,rgba(255,255,255,.4),transparent)}
+        .glass-card-dark{background:rgba(255,255,255,.08);backdrop-filter:blur(30px);border:1px solid rgba(255,255,255,.15);box-shadow:0 20px 60px rgba(0,0,0,.3),inset 0 1px 0 rgba(255,255,255,.15)}
+        .reading-text{line-height:2.8;font-size:1.75rem;font-weight:600;color:#1f2937;text-shadow:0 1px 2px rgba(255,255,255,.8);letter-spacing:1px;word-spacing:6px;font-family:'Amiri','Noto Sans Arabic',serif;text-align:justify;padding:2rem;background:linear-gradient(135deg, rgba(255,255,255,.98), rgba(248,250,252,.95));border-radius:15px;border:2px solid rgba(59,130,246,.2)}
+        .level-1{font-size:1.5rem;line-height:2.5}.level-2{font-size:1.65rem;line-height:2.6}.level-3{font-size:1.75rem;line-height:2.8}.level-4{font-size:1.85rem;line-height:3}
+        .timer-circle{stroke-dasharray:283;stroke-dashoffset:283;transition:stroke-dashoffset 1s linear;filter:drop-shadow(0 0 12px rgba(59,130,246,.6))}
+        .timer-container{background:linear-gradient(145deg, rgba(255,255,255,.15), rgba(255,255,255,.08));backdrop-filter:blur(30px);border:2px solid rgba(255,255,255,.2);box-shadow:0 20px 60px rgba(0,0,0,.3),0 8px 30px rgba(79,70,229,.2),inset 0 2px 0 rgba(255,255,255,.3);position:relative}
+        .timer-container::before{content:'';position:absolute;top:-2px;left:-2px;right:-2px;bottom:-2px;background:linear-gradient(45deg,#4f46e5,#7c3aed,#ec4899,#f59e0b);border-radius:inherit;z-index:-1;opacity:.6;filter:blur(8px)}
+        .btn-gradient{background:linear-gradient(145deg,#4f46e5,#7c3aed,#ec4899);border:1px solid rgba(255,255,255,.2);position:relative;overflow:hidden;transition:all .4s cubic-bezier(.175,.885,.32,1.275);box-shadow:0 10px 30px rgba(79,70,229,.4),0 4px 15px rgba(124,58,237,.3),inset 0 1px 0 rgba(255,255,255,.2);font-weight:700;transform:translateY(0) scale(1);backdrop-filter:blur(10px)}
+        .btn-gradient:hover{transform:translateY(-6px) scale(1.05);box-shadow:0 20px 50px rgba(79,70,229,.6),0 8px 25px rgba(124,58,237,.5),inset 0 1px 0 rgba(255,255,255,.3);background:linear-gradient(145deg,#5b21b6,#be185d,#f59e0b)}
+        .btn-gradient::before{content:'';position:absolute;top:0;left:-100%;width:100%;height:100%;background:linear-gradient(90deg,transparent,rgba(255,255,255,.4),transparent);transition:left .6s}
+        .btn-gradient:hover::before{left:100%}
+        .btn-success{background:linear-gradient(145deg,#48bb78,#38a169);box-shadow:0 8px 25px rgba(72,187,120,.4)}
+        .btn-success:hover{transform:translateY(-4px);box-shadow:0 15px 40px rgba(72,187,120,.6);background:linear-gradient(145deg,#38a169,#2f855a)}
+        .btn-danger{background:linear-gradient(145deg,#f56565,#e53e3e);box-shadow:0 8px 25px rgba(245,101,101,.4)}
+        .btn-danger:hover{transform:translateY(-4px);box-shadow:0 15px 40px rgba(245,101,101,.6)}
+        .btn-warning{background:linear-gradient(145deg,#ed8936,#dd6b20);box-shadow:0 8px 25px rgba(237,137,54,.4)}
+        .btn-warning:hover{transform:translateY(-4px);box-shadow:0 15px 40px rgba(237,137,54,.6)}
+        .progress-bar{background:linear-gradient(90deg,#48bb78,#38a169,#2f855a);transition:width .5s ease;box-shadow:0 4px 15px rgba(72,187,120,.4);position:relative;overflow:hidden}
+        .progress-bar::after{content:'';position:absolute;top:0;left:-100%;width:100%;height:100%;background:linear-gradient(90deg,transparent,rgba(255,255,255,.4),transparent);animation:progressShine 2s infinite}
+        @keyframes progressShine{0%{left:-100%}100%{left:100%}}
+        .word-highlight{background:linear-gradient(120deg,#fbbf24,#f59e0b);padding:4px 12px;border-radius:12px;color:#1f2937;font-weight:800;text-shadow:0 1px 2px rgba(255,255,255,.8);animation:wordPulse 1.2s infinite;box-shadow:0 4px 15px rgba(251,191,36,.6);border:2px solid rgba(245,158,11,.8)}
+        @keyframes wordPulse{0%,100%{transform:scale(1);box-shadow:0 4px 15px rgba(240,147,251,.5)}50%{transform:scale(1.08);box-shadow:0 8px 25px rgba(240,147,251,.7)}}
+        .stats-card{background:linear-gradient(145deg, rgba(255,255,255,.95), rgba(255,255,255,.8));backdrop-filter:blur(25px);border:2px solid rgba(255,255,255,.9);transition:all .4s ease;position:relative;overflow:hidden}
+        .stats-card::before{content:'';position:absolute;top:0;left:-100%;width:100%;height:100%;background:linear-gradient(90deg,transparent,rgba(255,255,255,.3),transparent);transition:left .6s}
+        .stats-card:hover{transform:translateY(-8px);box-shadow:0 20px 50px rgba(0,0,0,.15)}
+        .stats-card:hover::before{left:100%}
+        .floating-animation{animation:float 6s ease-in-out infinite}
+        @keyframes float{0%,100%{transform:translateY(0) rotate(0) scale(1)}25%{transform:translateY(-12px) rotate(1deg) scale(1.02)}50%{transform:translateY(-20px) rotate(0) scale(1.05)}75%{transform:translateY(-12px) rotate(-1deg) scale(1.02)}}
+        .container::before{content:'';position:fixed;top:0;left:0;width:100%;height:100%;background-image:
+            radial-gradient(3px 3px at 20px 30px, rgba(255,255,255,.8), transparent),
+            radial-gradient(2px 2px at 40px 70px, rgba(102,126,234,.6), transparent),
+            radial-gradient(1px 1px at 90px 40px, rgba(245,87,108,.5), transparent),
+            radial-gradient(2px 2px at 130px 80px, rgba(79,172,254,.4), transparent),
+            radial-gradient(1px 1px at 160px 30px, rgba(240,147,251,.6), transparent),
+            radial-gradient(2px 2px at 200px 60px, rgba(255,255,255,.3), transparent),
+            radial-gradient(1px 1px at 250px 90px, rgba(102,126,234,.4), transparent);
+            background-repeat:repeat;background-size:300px 150px;animation:sparkle 25s linear infinite;pointer-events:none;z-index:1}
+        @keyframes sparkle{0%{transform:translateY(0) rotate(0);opacity:1}50%{opacity:.7}100%{transform:translateY(-120px) rotate(360deg);opacity:1}}
+        body::after{content:'';position:fixed;top:0;left:0;width:100%;height:100%;background:
+            conic-gradient(from 0deg at 20% 20%, transparent 0deg, rgba(102,126,234,.1) 60deg, transparent 120deg),
+            conic-gradient(from 180deg at 80% 80%, transparent 0deg, rgba(245,87,108,.08) 60deg, transparent 120deg),
+            conic-gradient(from 90deg at 50% 50%, transparent 0deg, rgba(79,172,254,.06) 90deg, transparent 180deg);
+            pointer-events:none;z-index:-1;animation:conicRotate 40s linear infinite}
+        @keyframes conicRotate{0%{transform:rotate(0) scale(1)}50%{transform:rotate(180deg) scale(1.1)}100%{transform:rotate(360deg) scale(1)}}
+        .level-badge{background:linear-gradient(145deg,#3b82f6,#1e40af);color:#fff;padding:8px 16px;border-radius:25px;font-weight:700;font-size:.9rem;box-shadow:0 4px 15px rgba(59,130,246,.4);animation:badgeGlow 2s ease-in-out infinite alternate;border:1px solid rgba(255,255,255,.3)}
+        @keyframes badgeGlow{from{box-shadow:0 4px 15px rgba(102,126,234,.3)}to{box-shadow:0 6px 20px rgba(102,126,234,.5)}}
+        .encouragement-card{background:linear-gradient(145deg,#3b82f6,#1d4ed8);color:white;border-radius:20px;padding:1.5rem;text-align:center;font-weight:600;box-shadow:0 10px 30px rgba(59,130,246,.4);animation:encouragementPulse 3s ease-in-out infinite;border:2px solid rgba(255,255,255,.2)}
+        @keyframes encouragementPulse{0%,100%{transform:scale(1)}50%{transform:scale(1.02)}}
+        .audio-wave{display:inline-block;width:4px;height:20px;background:linear-gradient(to top,#48bb78,#38a169);margin:0 2px;border-radius:2px;animation:audioWave 1.5s ease-in-out infinite}
+        .audio-wave:nth-child(2){animation-delay:.1s}.audio-wave:nth-child(3){animation-delay:.2s}.audio-wave:nth-child(4){animation-delay:.3s}.audio-wave:nth-child(5){animation-delay:.4s}
+        @keyframes audioWave{0%,100%{height:20px}50%{height:40px}}
+        .level-selector{background:rgba(255,255,255,.9);backdrop-filter:blur(15px);border:2px solid rgba(255,255,255,.8);border-radius:15px;padding:1rem;margin-bottom:2rem}
+        .level-button{background:linear-gradient(145deg, rgba(255,255,255,.95), rgba(248,250,252,.9));backdrop-filter:blur(15px);border:2px solid rgba(59,130,246,.3);border-radius:16px;padding:1.5rem;margin:.5rem;transition:all .4s cubic-bezier(.175,.885,.32,1.275);cursor:pointer;position:relative;overflow:hidden;color:#1f2937}
+        .level-button::before{content:'';position:absolute;top:0;left:-100%;width:100%;height:100%;background:linear-gradient(90deg,transparent,rgba(255,255,255,.2),transparent);transition:left .6s}
+        .level-button:hover{transform:translateY(-6px) scale(1.02);box-shadow:0 15px 40px rgba(79,70,229,.3);border-color:rgba(255,255,255,.4)}
+        .level-button:hover::before{left:100%}
+        .level-button.active{background:linear-gradient(145deg,#3b82f6,#1d4ed8);color:white;border-color:rgba(59,130,246,.8);box-shadow:0 15px 40px rgba(59,130,246,.4),inset 0 1px 0 rgba(255,255,255,.3)}
+        .progress-chart{background:rgba(255,255,255,.95);backdrop-filter:blur(20px);border-radius:20px;padding:2rem;margin-top:2rem}
+        .voice-selector{background:rgba(255,255,255,.9);backdrop-filter:blur(15px);border:2px solid rgba(102,126,234,.3);border-radius:12px;padding:1rem;margin-top:1rem}
+        .audio-quality-indicator{display:inline-flex;align-items:center;background:linear-gradient(145deg,#48bb78,#38a169);color:white;padding:4px 12px;border-radius:20px;font-size:.8rem;font-weight:bold;margin-right:10px}
+        .phonetic-helper{background:rgba(255,255,255,.9);border:2px solid rgba(102,126,234,.3);border-radius:12px;padding:1rem;margin-top:1rem;font-size:.9rem;color:#4a5568}
     </style>
 </head>
 <body>
     <div class="container mx-auto px-4 py-8 max-w-7xl">
         <!-- Header -->
-        <div class="text-center mb-12">
-            <h1 class="text-6xl font-bold text-white mb-4 floating-animation drop-shadow-lg">
-                📚 منصة القراءة الذكية
-            </h1>
-            <p class="text-2xl text-white font-medium drop-shadow-md">تطوير مهارات القراءة والفهم للمرحلتين الإعدادية والثانوية</p>
-            <div class="mt-6">
-                <span class="level-badge">🎯 تعلم • تطور • تميز</span>
+        <div class="text-center mb-16 relative">
+            <div class="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent h-px top-1/2"></div>
+            <div class="relative z-10 glass-card rounded-3xl p-8 mx-auto max-w-4xl">
+                <h1 class="text-7xl font-bold bg-gradient-to-r from-blue-600 via-indigo-700 to-purple-700 bg-clip-text text-transparent mb-6 floating-animation">
+                    📚 منصة القراءة الذكية
+                </h1>
+                <p class="text-2xl text-gray-800 font-semibold mb-6 leading-relaxed">
+                    تطوير مهارات القراءة والفهم للمرحلتين الإعدادية والثانوية
+                </p>
+                <div class="flex justify-center gap-4 flex-wrap">
+                    <span class="level-badge">🎯 تعلم</span>
+                    <span class="level-badge">📈 تطور</span>
+                    <span class="level-badge">⭐ تميز</span>
+                </div>
             </div>
         </div>
 
@@ -425,7 +156,7 @@
             <div class="lg:col-span-2">
                 <div class="glass-card rounded-3xl p-8 mb-8">
                     <div class="flex justify-between items-center mb-6">
-                        <h2 class="text-3xl font-bold text-gray-800">📖 نص القراءة</h2>
+                        <h2 class="text-4xl font-bold text-gray-800">📖 نص القراءة</h2>
                         <div class="flex gap-3">
                             <select id="textSelect" class="px-6 py-3 rounded-xl border-2 border-purple-200 bg-white/90 backdrop-blur-sm font-medium text-lg">
                                 <option value="0">النص الأول</option>
@@ -470,6 +201,9 @@
                         </h4>
                         
                         <div class="flex flex-wrap justify-center gap-4 mb-6">
+                            <button id="testAudioBtn" class="bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white px-6 py-3 rounded-xl font-bold text-lg transform hover:scale-105 transition-all">
+                                🔊 اختبار الصوت
+                            </button>
                             <button id="playAudioBtn" class="btn-success text-white px-8 py-3 rounded-xl font-bold text-lg">
                                 ▶️ تشغيل الصوت العربي
                             </button>
@@ -483,34 +217,9 @@
                                 🔄 إعادة الجملة
                             </button>
                         </div>
-                        
-                        <!-- Voice Selection -->
-                        <div class="voice-selector mb-6">
-                            <h5 class="text-lg font-bold text-gray-700 mb-3 text-center">🎤 اختر الصوت المفضل</h5>
-                            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                                <button class="voice-option active" data-voice="arabic-female">
-                                    <div class="text-center p-3 bg-white/70 rounded-xl border-2 border-purple-300">
-                                        <div class="text-2xl mb-2">👩‍🏫</div>
-                                        <div class="font-bold">صوت أنثوي</div>
-                                        <div class="text-sm text-gray-600">واضح ومناسب للطلاب</div>
-                                    </div>
-                                </button>
-                                <button class="voice-option" data-voice="arabic-male">
-                                    <div class="text-center p-3 bg-white/70 rounded-xl border-2 border-purple-300">
-                                        <div class="text-2xl mb-2">👨‍🏫</div>
-                                        <div class="font-bold">صوت ذكوري</div>
-                                        <div class="text-sm text-gray-600">قوي ومؤثر</div>
-                                    </div>
-                                </button>
-                                <button class="voice-option" data-voice="arabic-child">
-                                    <div class="text-center p-3 bg-white/70 rounded-xl border-2 border-purple-300">
-                                        <div class="text-2xl mb-2">👶</div>
-                                        <div class="font-bold">صوت طفولي</div>
-                                        <div class="text-sm text-gray-600">مناسب للمبتدئين</div>
-                                    </div>
-                                </button>
-                            </div>
-                        </div>
+
+                        <!-- ✅ Hidden audio element to play MP3 files -->
+                        <audio id="audioPlayer" preload="auto" class="hidden"></audio>
                         
                         <!-- Audio Settings -->
                         <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
@@ -560,7 +269,7 @@
 
                 <!-- Progress Section -->
                 <div class="glass-card rounded-3xl p-8 mb-8">
-                    <h3 class="text-3xl font-bold text-gray-800 mb-6">📊 تقدم القراءة</h3>
+                    <h3 class="text-4xl font-bold text-gray-800 mb-6">📊 تقدم القراءة</h3>
                     <div class="mb-6">
                         <div class="flex justify-between text-lg font-bold text-gray-700 mb-3">
                             <span>الكلمات المقروءة</span>
@@ -572,21 +281,21 @@
                     </div>
                     
                     <div class="grid grid-cols-2 md:grid-cols-4 gap-6 mt-8">
-                        <div class="text-center bg-blue-50 p-4 rounded-xl">
-                            <div class="text-4xl font-bold text-blue-600" id="wordsRead">0</div>
-                            <div class="text-sm text-gray-600 font-medium">كلمة مقروءة</div>
+                        <div class="text-center bg-white/95 p-6 rounded-2xl border border-blue-400/50 hover:border-blue-500 transition-all shadow-lg">
+                            <div class="text-5xl font-bold text-blue-600 mb-2" id="wordsRead">0</div>
+                            <div class="text-sm text-gray-700 font-semibold">كلمة مقروءة</div>
                         </div>
-                        <div class="text-center bg-green-50 p-4 rounded-xl">
-                            <div class="text-4xl font-bold text-green-600" id="readingSpeed">0</div>
-                            <div class="text-sm text-gray-600 font-medium">كلمة/دقيقة</div>
+                        <div class="text-center bg-white/95 p-6 rounded-2xl border border-green-400/50 hover:border-green-500 transition-all shadow-lg">
+                            <div class="text-5xl font-bold text-green-600 mb-2" id="readingSpeed">0</div>
+                            <div class="text-sm text-gray-700 font-semibold">كلمة/دقيقة</div>
                         </div>
-                        <div class="text-center bg-purple-50 p-4 rounded-xl">
-                            <div class="text-4xl font-bold text-purple-600" id="accuracy">100%</div>
-                            <div class="text-sm text-gray-600 font-medium">دقة القراءة</div>
+                        <div class="text-center bg-white/95 p-6 rounded-2xl border border-purple-400/50 hover:border-purple-500 transition-all shadow-lg">
+                            <div class="text-5xl font-bold text-purple-600 mb-2" id="accuracy">100%</div>
+                            <div class="text-sm text-gray-700 font-semibold">دقة القراءة</div>
                         </div>
-                        <div class="text-center bg-orange-50 p-4 rounded-xl">
-                            <div class="text-4xl font-bold text-orange-600" id="level">1</div>
-                            <div class="text-sm text-gray-600 font-medium">المستوى الحالي</div>
+                        <div class="text-center bg-white/95 p-6 rounded-2xl border border-orange-400/50 hover:border-orange-500 transition-all shadow-lg">
+                            <div class="text-5xl font-bold text-orange-600 mb-2" id="level">1</div>
+                            <div class="text-sm text-gray-700 font-semibold">المستوى الحالي</div>
                         </div>
                     </div>
                 </div>
@@ -602,7 +311,7 @@
             <div class="space-y-8">
                 <!-- Timer -->
                 <div class="glass-card rounded-3xl p-8 text-center">
-                    <h3 class="text-2xl font-bold text-gray-800 mb-6">⏱️ المؤقت</h3>
+                    <h3 class="text-3xl font-bold text-gray-800 mb-6">⏱️ المؤقت</h3>
                     <div class="timer-container rounded-full w-56 h-56 mx-auto flex items-center justify-center relative">
                         <svg class="w-52 h-52 transform -rotate-90 absolute">
                             <circle cx="104" cy="104" r="50" stroke="#e5e7eb" stroke-width="10" fill="none"/>
@@ -648,27 +357,27 @@
                 
                 <!-- Enhanced Tips Section -->
                 <div class="glass-card rounded-3xl p-8">
-                    <h3 class="text-2xl font-bold text-gray-800 mb-6">💡 نصائح للتفوق</h3>
+                    <h3 class="text-3xl font-bold text-gray-800 mb-6">💡 نصائح للتفوق</h3>
                     <div class="space-y-4 text-sm">
-                        <div class="p-4 bg-gradient-to-r from-blue-50 to-blue-100 rounded-xl border-l-4 border-blue-500">
-                            <h4 class="font-bold text-blue-800 mb-2">🎧 للطلاب الضعاف:</h4>
-                            <p class="text-blue-700">استخدم الصوت البطيء واستمع عدة مرات قبل المحاولة بمفردك</p>
+                        <div class="bg-white/90 p-4 rounded-xl border border-blue-400/50 hover:border-blue-500 transition-all shadow-md">
+                            <h4 class="font-bold text-blue-700 mb-2">🎧 للطلاب الضعاف:</h4>
+                            <p class="text-gray-700">استخدم الصوت البطيء واستمع عدة مرات قبل المحاولة بمفردك</p>
                         </div>
-                        <div class="p-4 bg-gradient-to-r from-green-50 to-green-100 rounded-xl border-l-4 border-green-500">
-                            <h4 class="font-bold text-green-800 mb-2">⚡ لزيادة السرعة:</h4>
-                            <p class="text-green-700">ابدأ بسرعة 0.5x ثم زد تدريجياً حتى تصل للسرعة الطبيعية</p>
+                        <div class="bg-white/90 p-4 rounded-xl border border-green-400/50 hover:border-green-500 transition-all shadow-md">
+                            <h4 class="font-bold text-green-700 mb-2">⚡ لزيادة السرعة:</h4>
+                            <p class="text-gray-700">ابدأ بسرعة 0.5x ثم زد تدريجياً حتى تصل للسرعة الطبيعية</p>
                         </div>
-                        <div class="p-4 bg-gradient-to-r from-purple-50 to-purple-100 rounded-xl border-l-4 border-purple-500">
-                            <h4 class="font-bold text-purple-800 mb-2">🎯 للتركيز:</h4>
-                            <p class="text-purple-700">استخدم تمييز الكلمات والتمرير التلقائي لمتابعة أفضل</p>
+                        <div class="bg-white/90 p-4 rounded-xl border border-purple-400/50 hover:border-purple-500 transition-all shadow-md">
+                            <h4 class="font-bold text-purple-700 mb-2">🎯 للتركيز:</h4>
+                            <p class="text-gray-700">استخدم تمييز الكلمات والتمرير التلقائي لمتابعة أفضل</p>
                         </div>
-                        <div class="p-4 bg-gradient-to-r from-orange-50 to-orange-100 rounded-xl border-l-4 border-orange-500">
-                            <h4 class="font-bold text-orange-800 mb-2">📚 للفهم العميق:</h4>
-                            <p class="text-orange-700">اقرأ النص أكثر من مرة وحاول فهم المعنى العام</p>
+                        <div class="bg-white/90 p-4 rounded-xl border border-orange-400/50 hover:border-orange-500 transition-all shadow-md">
+                            <h4 class="font-bold text-orange-700 mb-2">📚 للفهم العميق:</h4>
+                            <p class="text-gray-700">اقرأ النص أكثر من مرة وحاول فهم المعنى العام</p>
                         </div>
-                        <div class="p-4 bg-gradient-to-r from-pink-50 to-pink-100 rounded-xl border-l-4 border-pink-500">
-                            <h4 class="font-bold text-pink-800 mb-2">🏆 للتميز:</h4>
-                            <p class="text-pink-700">مارس القراءة يومياً لمدة 15-30 دقيقة لتحقيق أفضل النتائج</p>
+                        <div class="bg-white/90 p-4 rounded-xl border border-pink-400/50 hover:border-pink-500 transition-all shadow-md">
+                            <h4 class="font-bold text-pink-700 mb-2">🏆 للتميز:</h4>
+                            <p class="text-gray-700">مارس القراءة يومياً لمدة 15-30 دقيقة لتحقيق أفضل النتائج</p>
                         </div>
                     </div>
                 </div>
@@ -676,925 +385,13 @@
                 <!-- Achievement Badges -->
                 <div class="glass-card rounded-3xl p-8">
                     <h3 class="text-2xl font-bold text-gray-800 mb-6">🏅 إنجازاتك</h3>
-                    <div id="achievementBadges" class="grid grid-cols-2 gap-4">
-                        <!-- سيتم إضافة الشارات هنا -->
-                    </div>
+                    <div id="achievementBadges" class="grid grid-cols-2 gap-4"></div>
                 </div>
             </div>
         </div>
     </div>
 
-    <script>
-        class SmartReadingPlatform {
-            constructor() {
-                // النصوص المتدرجة حسب المستوى
-                this.texts = {
-                    1: [ // المستوى الأول - للمبتدئين
-                        {
-                            title: "الطَّائِرُ الصَّغِيرُ",
-                            content: "كَانَ هُنَاكَ طَائِرٌ صَغِيرٌ يَعِيشُ فِي غَابَةٍ جَمِيلَةٍ. كَانَ الطَّائِرُ يُحِبُّ الغِنَاءَ كُلَّ صَبَاحٍ. فِي يَوْمٍ مِنَ الأَيَّامِ، قَرَّرَ الطَّائِرُ أَنْ يَسْتَكْشِفَ أَجْزَاءً جَدِيدَةً مِنَ الغَابَةِ. طَارَ عَالِيًا فَوْقَ الأَشْجَارِ وَرَأَى مَنْظَرًا رَائِعًا. عَادَ الطَّائِرُ إِلَى عُشِّهِ سَعِيدًا بِمَا رَآهُ."
-                        },
-                        {
-                            title: "الفَلَّاحُ الطَّيِّبُ",
-                            content: "فِي قَرْيَةٍ صَغِيرَةٍ، كَانَ يَعِيشُ فَلَّاحٌ طَيِّبُ القَلْبِ. كَانَ يَزْرَعُ الخُضْرَوَاتِ وَالفَوَاكِهَ فِي حَقْلِهِ الصَّغِيرِ. كُلَّ يَوْمٍ، كَانَ يَسْتَيْقِظُ مُبَكِّرًا لِيَعْتَنِيَ بِنَبَاتَاتِهِ. الجِيرَانُ يُحِبُّونَهُ كَثِيرًا لأَنَّهُ يُسَاعِدُهُمْ دَائِمًا. فِي نِهَايَةِ المَوْسِمِ، كَانَ مَحْصُولُهُ وَفِيرًا وَجَمِيلًا."
-                        }
-                    ],
-                    2: [ // المستوى الثاني - للمتوسطين
-                        {
-                            title: "رِحْلَةُ الاِكْتِشَافِ",
-                            content: "انْطَلَقَتْ مَجْمُوعَةٌ مِنَ الطُّلَّابِ فِي رِحْلَةٍ عِلْمِيَّةٍ إِلَى المُتْحَفِ الطَّبِيعِيِّ. كَانُوا مُتَحَمِّسِينَ لِرُؤْيَةِ الهَيَاكِلِ العَظْمِيَّةِ لِلدِّينَاصُورَاتِ وَالحَيَوَانَاتِ المُنْقَرِضَةِ. شَرَحَ لَهُمُ المُرْشِدُ تَارِيخَ هَذِهِ المَخْلُوقَاتِ وَكَيْفَ عَاشَتْ عَلَى الأَرْضِ مَلَايِينَ السِّنِينَ. تَعَلَّمَ الطُّلَّابُ أَهَمِّيَّةَ الحِفَاظِ عَلَى البِيئَةِ وَحِمَايَةِ الحَيَوَانَاتِ مِنَ الانْقِرَاضِ."
-                        },
-                        {
-                            title: "عَالِمُ الفَضَاءِ الشَّابُّ",
-                            content: "أَحْمَدُ طَالِبٌ فِي المَرْحَلَةِ الثَّانَوِيَّةِ يَحْلُمُ بِأَنْ يُصْبِحَ عَالِمَ فَضَاءٍ. يَقْضِي سَاعَاتٍ طَوِيلَةً فِي قِرَاءَةِ الكُتُبِ العِلْمِيَّةِ وَمُشَاهَدَةِ الأَفْلَامِ الوَثَائِقِيَّةِ عَنِ الكَوَاكِبِ وَالنُّجُومِ. يَسْتَخْدِمُ تِلِسْكُوبًا صَغِيرًا لِمُرَاقَبَةِ القَمَرِ وَالكَوَاكِبِ فِي اللَّيْلِ. يُؤْمِنُ أَحْمَدُ بِأَنَّ العِلْمَ وَالمَعْرِفَةَ هُمَا مِفْتَاحُ التَّقَدُّمِ وَالنَّجَاحِ."
-                        }
-                    ],
-                    3: [ // المستوى الثالث - للمتقدمين
-                        {
-                            title: "التِّكْنُولُوجِيَا وَالتَّعْلِيمُ",
-                            content: "شَهِدَ القَرْنُ الحَادِي وَالعِشْرُونَ تَطَوُّرًا هَائِلًا فِي مَجَالِ التِّكْنُولُوجِيَا التَّعْلِيمِيَّةِ. أَصْبَحَتِ الفُصُولُ الذَّكِيَّةُ وَالتَّعَلُّمُ الإِلِكْتُرُونِيُّ جُزْءًا لَا يَتَجَزَّأُ مِنَ العَمَلِيَّةِ التَّعْلِيمِيَّةِ. تُسَاعِدُ هَذِهِ التِّقْنِيَّاتُ الطُّلَّابَ عَلَى فَهْمِ المَفَاهِيمِ المُعَقَّدَةِ بِطَرِيقَةٍ تَفَاعُلِيَّةٍ وَمُمْتِعَةٍ. كَمَا تُتِيحُ لِلْمُعَلِّمِينَ إِمْكَانِيَّةَ تَخْصِيصِ التَّعْلِيمِ وَفْقًا لِاحْتِيَاجَاتِ كُلِّ طَالِبٍ عَلَى حِدَةٍ."
-                        },
-                        {
-                            title: "الطَّاقَةُ المُتَجَدِّدَةُ",
-                            content: "تُعَدُّ الطَّاقَةُ المُتَجَدِّدَةُ مِنْ أَهَمِّ الحُلُولِ لِمُوَاجَهَةِ تَحَدِّيَاتِ التَّغَيُّرِ المُنَاخِيِّ وَالحِفَاظِ عَلَى البِيئَةِ. تَشْمَلُ مَصَادِرُ الطَّاقَةِ المُتَجَدِّدَةِ الطَّاقَةَ الشَّمْسِيَّةَ وَطَاقَةَ الرِّيَاحِ وَالطَّاقَةَ المَائِيَّةَ. تَسْتَثْمِرُ العَدِيدُ مِنَ الدُّوَلِ مِلْيَارَاتِ الدُّولَارَاتِ فِي تَطْوِيرِ هَذِهِ التِّقْنِيَّاتِ لِتَقْلِيلِ الاِعْتِمَادِ عَلَى الوَقُودِ الأُحْفُورِيِّ وَخَفْضِ انْبِعَاثَاتِ الكَرْبُونِ."
-                        }
-                    ],
-                    4: [ // المستوى الرابع - للمتميزين
-                        {
-                            title: "الذَّكَاءُ الاِصْطِنَاعِيُّ وَمُسْتَقْبَلُ البَشَرِيَّةِ",
-                            content: "يُمَثِّلُ الذَّكَاءُ الاِصْطِنَاعِيُّ نَقْلَةً نَوْعِيَّةً فِي تَارِيخِ التِّكْنُولُوجِيَا، حَيْثُ يُحَاكِي قُدْرَاتِ العَقْلِ البَشَرِيِّ فِي التَّعَلُّمِ وَالاِسْتِنْتَاجِ وَحَلِّ المُشْكِلَاتِ. تَتَنَوَّعُ تَطْبِيقَاتُهُ مِنَ الطِّبِّ وَالهَنْدَسَةِ إِلَى التَّعْلِيمِ وَالفُنُونِ. وَرَغْمَ الفَوَائِدِ الهَائِلَةِ الَّتِي يُقَدِّمُهَا، إِلَّا أَنَّهُ يُثِيرُ تَسَاؤُلَاتٍ أَخْلَاقِيَّةً وَاجْتِمَاعِيَّةً مُهِمَّةً حَوْلَ مُسْتَقْبَلِ العَمَلِ وَالخُصُوصِيَّةِ وَالأَمَانِ السَّيْبَرَانِيِّ."
-                        },
-                        {
-                            title: "الحَضَارَةُ الإِسْلَامِيَّةُ وَإِسْهَامَاتُهَا العِلْمِيَّةُ",
-                            content: "أَسْهَمَتِ الحَضَارَةُ الإِسْلَامِيَّةُ إِسْهَامَاتٍ جَوْهَرِيَّةً فِي تَقَدُّمِ العُلُومِ وَالمَعَارِفِ الإِنْسَانِيَّةِ عَبْرَ التَّارِيخِ. فَقَدْ بَرَعَ العُلَمَاءُ المُسْلِمُونَ فِي الرِّيَاضِيَّاتِ وَالفَلَكِ وَالطِّبِّ وَالكِيمْيَاءِ وَالفَلْسَفَةِ. أَسَّسُوا بُيُوتَ الحِكْمَةِ وَالمَكْتَبَاتِ الضَّخْمَةَ، وَتَرْجَمُوا التُّرَاثَ اليُونَانِيَّ وَالفَارِسِيَّ وَالهِنْدِيَّ، مُضِيفِينَ إِلَيْهِ اكْتِشَافَاتِهِمْ وَابْتِكَارَاتِهِمُ الأَصِيلَةَ الَّتِي أَثَّرَتْ عَلَى النَّهْضَةِ الأُورُوبِّيَّةِ."
-                        }
-                    ]
-                };
-                
-                this.encouragements = {
-                    start: [
-                        { title: "🌟 أنت قادر على التميز!", text: "القراءة مفتاح المعرفة، وأنت تملك هذا المفتاح. ابدأ رحلتك نحو التفوق!" },
-                        { title: "🚀 انطلق نحو النجاح!", text: "كل كلمة تقرأها تقربك خطوة من أهدافك. استمر وستصل!" },
-                        { title: "💪 قوتك في إصرارك!", text: "المثابرة والتدريب المستمر هما سر النجاح في القراءة." }
-                    ],
-                    progress: [
-                        { title: "🎯 أداء رائع!", text: "تقدمك ملحوظ ومستمر. استمر على هذا المنوال!" },
-                        { title: "⭐ تحسن مذهل!", text: "سرعتك في القراءة تتحسن يوماً بعد يوم. أنت على الطريق الصحيح!" },
-                        { title: "🏆 إنجاز متميز!", text: "وصلت لمستوى جديد من الإتقان. فخور بك!" }
-                    ],
-                    complete: [
-                        { title: "🎉 مبروك! أكملت النص!", text: "أداء استثنائي! أنت تتقدم بخطوات ثابتة نحو الإتقان." },
-                        { title: "✨ إنجاز رائع!", text: "قراءة ممتازة! مهاراتك تتطور بشكل مذهل." },
-                        { title: "🌟 أحسنت صنعاً!", text: "قراءة متقنة ومتميزة. استمر في هذا التفوق!" }
-                    ]
-                };
-                
-                this.currentLevel = 1;
-                this.currentTextIndex = 0;
-                this.currentWordIndex = 0;
-                this.isReading = false;
-                this.startTime = null;
-                this.timer = null;
-                this.elapsedTime = 0;
-                this.words = [];
-                
-                // Enhanced speech synthesis properties
-                this.speechSynth = window.speechSynthesis;
-                this.currentUtterance = null;
-                this.voices = [];
-                this.isAudioReading = false;
-                this.audioWordIndex = 0;
-                this.audioTimer = null;
-                this.wordTimings = [];
-                this.selectedVoice = 'arabic-female';
-                this.currentAudio = null;
-                
-                // Progress tracking
-                this.progressData = JSON.parse(localStorage.getItem('progressData') || '[]');
-                this.chart = null;
-                
-                this.initializeElements();
-                this.loadStats();
-                this.setupEventListeners();
-                this.loadVoices();
-                this.updateText();
-                this.updateEncouragement('start');
-                this.initializeChart();
-                this.updateAchievements();
-            }
-            
-            initializeElements() {
-                this.elements = {
-                    // Level selection
-                    levelButtons: document.querySelectorAll('.level-button'),
-                    
-                    // Text and reading
-                    textSelect: document.getElementById('textSelect'),
-                    readingText: document.getElementById('readingText'),
-                    startBtn: document.getElementById('startBtn'),
-                    pauseBtn: document.getElementById('pauseBtn'),
-                    resetBtn: document.getElementById('resetBtn'),
-                    
-                    // Progress
-                    progressBar: document.getElementById('progressBar'),
-                    progressText: document.getElementById('progressText'),
-                    wordsRead: document.getElementById('wordsRead'),
-                    readingSpeed: document.getElementById('readingSpeed'),
-                    accuracy: document.getElementById('accuracy'),
-                    level: document.getElementById('level'),
-                    
-                    // Timer
-                    timerDisplay: document.getElementById('timerDisplay'),
-                    timerCircle: document.getElementById('timerCircle'),
-                    
-                    // Audio
-                    playAudioBtn: document.getElementById('playAudioBtn'),
-                    pauseAudioBtn: document.getElementById('pauseAudioBtn'),
-                    stopAudioBtn: document.getElementById('stopAudioBtn'),
-                    repeatAudioBtn: document.getElementById('repeatAudioBtn'),
-                    speedRange: document.getElementById('speedRange'),
-                    speedValue: document.getElementById('speedValue'),
-                    pitchRange: document.getElementById('pitchRange'),
-                    pitchValue: document.getElementById('pitchValue'),
-                    volumeRange: document.getElementById('volumeRange'),
-                    volumeValue: document.getElementById('volumeValue'),
-                    highlightWords: document.getElementById('highlightWords'),
-                    autoScroll: document.getElementById('autoScroll'),
-                    slowMode: document.getElementById('slowMode'),
-                    audioIndicator: document.getElementById('audioIndicator'),
-                    voiceOptions: document.querySelectorAll('.voice-option'),
-                    
-                    // Stats
-                    totalSessions: document.getElementById('totalSessions'),
-                    totalWords: document.getElementById('totalWords'),
-                    avgSpeed: document.getElementById('avgSpeed'),
-                    bestSpeed: document.getElementById('bestSpeed'),
-                    totalTime: document.getElementById('totalTime'),
-                    clearStats: document.getElementById('clearStats'),
-                    
-                    // Encouragement
-                    encouragementTitle: document.getElementById('encouragementTitle'),
-                    encouragementText: document.getElementById('encouragementText'),
-                    
-                    // Chart
-                    progressChart: document.getElementById('progressChart'),
-                    
-                    // Achievements
-                    achievementBadges: document.getElementById('achievementBadges')
-                };
-            }
-            
-            setupEventListeners() {
-                // Level selection
-                this.elements.levelButtons.forEach((btn, index) => {
-                    btn.addEventListener('click', () => {
-                        this.selectLevel(index + 1);
-                    });
-                });
-                
-                // Text selection
-                this.elements.textSelect.addEventListener('change', () => {
-                    this.currentTextIndex = parseInt(this.elements.textSelect.value);
-                    this.updateText();
-                    this.reset();
-                    this.stopAudio();
-                });
-                
-                // Reading controls
-                this.elements.startBtn.addEventListener('click', () => this.startReading());
-                this.elements.pauseBtn.addEventListener('click', () => this.pauseReading());
-                this.elements.resetBtn.addEventListener('click', () => this.reset());
-                
-                // Audio controls
-                this.elements.playAudioBtn.addEventListener('click', () => this.startAudioReading());
-                this.elements.pauseAudioBtn.addEventListener('click', () => this.pauseAudio());
-                this.elements.stopAudioBtn.addEventListener('click', () => this.stopAudio());
-                this.elements.repeatAudioBtn.addEventListener('click', () => this.repeatCurrentSentence());
-                
-                // Voice selection
-                this.elements.voiceOptions.forEach(option => {
-                    option.addEventListener('click', () => {
-                        this.elements.voiceOptions.forEach(opt => opt.classList.remove('active'));
-                        option.classList.add('active');
-                        this.selectedVoice = option.dataset.voice;
-                    });
-                });
-                
-                // Audio settings
-                this.elements.speedRange.addEventListener('input', (e) => {
-                    this.elements.speedValue.textContent = e.target.value + 'x';
-                });
-                
-                this.elements.pitchRange.addEventListener('input', (e) => {
-                    this.elements.pitchValue.textContent = e.target.value;
-                });
-                
-                this.elements.volumeRange.addEventListener('input', (e) => {
-                    this.elements.volumeValue.textContent = Math.round(e.target.value * 100) + '%';
-                });
-                
-                // Stats
-                this.elements.clearStats.addEventListener('click', () => this.clearStats());
-                
-                // Keyboard shortcuts
-                document.addEventListener('keydown', (e) => {
-                    if (e.code === 'Space' && !e.target.matches('input, textarea, select')) {
-                        e.preventDefault();
-                        if (this.isReading) {
-                            this.pauseReading();
-                        } else {
-                            this.startReading();
-                        }
-                    } else if (e.code === 'Escape') {
-                        this.reset();
-                        this.stopAudio();
-                    } else if (e.code === 'KeyA' && e.ctrlKey) {
-                        e.preventDefault();
-                        if (this.isAudioReading) {
-                            this.pauseAudio();
-                        } else {
-                            this.startAudioReading();
-                        }
-                    }
-                });
-            }
-            
-            selectLevel(level) {
-                this.currentLevel = level;
-                this.currentTextIndex = 0;
-                
-                // Update UI
-                this.elements.levelButtons.forEach((btn, index) => {
-                    btn.classList.toggle('active', index + 1 === level);
-                });
-                
-                this.elements.level.textContent = level;
-                this.updateTextOptions();
-                this.updateText();
-                this.reset();
-                this.stopAudio();
-                this.updateEncouragement('start');
-            }
-            
-            updateTextOptions() {
-                const texts = this.texts[this.currentLevel];
-                this.elements.textSelect.innerHTML = '';
-                
-                texts.forEach((text, index) => {
-                    const option = document.createElement('option');
-                    option.value = index;
-                    option.textContent = text.title;
-                    this.elements.textSelect.appendChild(option);
-                });
-            }
-            
-            updateText() {
-                const currentText = this.texts[this.currentLevel][this.currentTextIndex];
-                if (!currentText) return;
-                
-                this.words = currentText.content.split(' ');
-                this.elements.readingText.innerHTML = currentText.content;
-                this.elements.readingText.className = `reading-text level-${this.currentLevel}`;
-                this.updateProgress();
-            }
-            
-            startReading() {
-                if (!this.isReading) {
-                    this.isReading = true;
-                    this.startTime = Date.now() - this.elapsedTime;
-                    this.elements.startBtn.disabled = true;
-                    this.elements.pauseBtn.disabled = false;
-                    this.startTimer();
-                    this.highlightCurrentWord();
-                }
-            }
-            
-            pauseReading() {
-                if (this.isReading) {
-                    this.isReading = false;
-                    this.elements.startBtn.disabled = false;
-                    this.elements.pauseBtn.disabled = true;
-                    clearInterval(this.timer);
-                    this.saveSession();
-                    this.updateEncouragement('progress');
-                }
-            }
-            
-            reset() {
-                this.isReading = false;
-                this.currentWordIndex = 0;
-                this.elapsedTime = 0;
-                this.startTime = null;
-                
-                this.elements.startBtn.disabled = false;
-                this.elements.pauseBtn.disabled = true;
-                
-                clearInterval(this.timer);
-                this.updateText();
-                this.updateProgress();
-                this.updateTimer();
-                this.updateTimerCircle();
-            }
-            
-            startTimer() {
-                this.timer = setInterval(() => {
-                    this.elapsedTime = Date.now() - this.startTime;
-                    this.updateTimer();
-                    this.updateTimerCircle();
-                    this.updateReadingSpeed();
-                    
-                    // Auto-advance words (simulate reading)
-                    if (Math.random() < 0.4 && this.currentWordIndex < this.words.length - 1) {
-                        this.currentWordIndex++;
-                        this.highlightCurrentWord();
-                        this.updateProgress();
-                        
-                        if (this.currentWordIndex >= this.words.length - 1) {
-                            this.completeReading();
-                        }
-                    }
-                }, 800);
-            }
-            
-            highlightCurrentWord() {
-                const highlightedWords = this.words.map((word, index) => {
-                    if (index === this.currentWordIndex) {
-                        return `<span class="word-highlight">${word}</span>`;
-                    }
-                    return word;
-                });
-                
-                this.elements.readingText.innerHTML = highlightedWords.join(' ');
-                
-                // Auto scroll to current word
-                if (this.elements.autoScroll.checked) {
-                    const highlightedElement = this.elements.readingText.querySelector('.word-highlight');
-                    if (highlightedElement) {
-                        highlightedElement.scrollIntoView({
-                            behavior: 'smooth',
-                            block: 'center'
-                        });
-                    }
-                }
-            }
-            
-            updateProgress() {
-                const progress = this.words.length > 0 ? (this.currentWordIndex / this.words.length) * 100 : 0;
-                this.elements.progressBar.style.width = `${progress}%`;
-                this.elements.progressText.textContent = `${this.currentWordIndex} / ${this.words.length}`;
-                this.elements.wordsRead.textContent = this.currentWordIndex;
-            }
-            
-            updateTimer() {
-                const minutes = Math.floor(this.elapsedTime / 60000);
-                const seconds = Math.floor((this.elapsedTime % 60000) / 1000);
-                this.elements.timerDisplay.textContent = 
-                    `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
-            }
-            
-            updateTimerCircle() {
-                const maxTime = 600000; // 10 minutes max
-                const progress = Math.min(this.elapsedTime / maxTime, 1);
-                const circumference = 2 * Math.PI * 50; // radius = 50
-                const offset = circumference - (progress * circumference);
-                this.elements.timerCircle.style.strokeDasharray = circumference;
-                this.elements.timerCircle.style.strokeDashoffset = offset;
-            }
-            
-            updateReadingSpeed() {
-                if (this.elapsedTime > 0) {
-                    const minutes = this.elapsedTime / 60000;
-                    const speed = Math.round(this.currentWordIndex / minutes);
-                    this.elements.readingSpeed.textContent = speed || 0;
-                }
-            }
-            
-            completeReading() {
-                this.pauseReading();
-                this.updateEncouragement('complete');
-                this.updateAchievements();
-                setTimeout(() => {
-                    const encouragement = this.encouragements.complete[Math.floor(Math.random() * this.encouragements.complete.length)];
-                    alert(`${encouragement.title}\n\n${encouragement.text}`);
-                }, 500);
-            }
-            
-            // Enhanced speech synthesis methods
-            loadVoices() {
-                const loadVoicesHandler = () => {
-                    this.voices = this.speechSynth.getVoices();
-                    
-                    // Priority order for Arabic voices
-                    const arabicVoicePriority = [
-                        'Microsoft Hoda - Arabic (Saudi Arabia)',
-                        'Microsoft Naayf - Arabic (Saudi Arabia)', 
-                        'Google العربية',
-                        'Arabic Female',
-                        'Arabic Male',
-                        'ar-SA',
-                        'ar-EG',
-                        'ar-AE'
-                    ];
-                    
-                    // Find the best Arabic voice
-                    let bestArabicVoice = null;
-                    
-                    for (const priority of arabicVoicePriority) {
-                        bestArabicVoice = this.voices.find(voice => 
-                            voice.name.includes(priority) || 
-                            voice.lang.includes(priority) ||
-                            voice.name.toLowerCase().includes('arabic') ||
-                            voice.lang.toLowerCase().includes('ar')
-                        );
-                        if (bestArabicVoice) break;
-                    }
-                    
-                    // Filter all Arabic voices
-                    const arabicVoices = this.voices.filter(voice => 
-                        voice.lang.includes('ar') || 
-                        voice.name.toLowerCase().includes('arabic') ||
-                        voice.lang.includes('AR') ||
-                        voice.name.includes('العربية') ||
-                        voice.lang.includes('sa') ||
-                        voice.lang.includes('eg')
-                    );
-                    
-                    this.voices = arabicVoices.length > 0 ? arabicVoices : this.voices;
-                    this.bestArabicVoice = bestArabicVoice;
-                    
-                    console.log('Available Arabic voices:', arabicVoices.map(v => `${v.name} (${v.lang})`));
-                    console.log('Best Arabic voice selected:', bestArabicVoice?.name);
-                };
-                
-                // Load voices with retry mechanism
-                const tryLoadVoices = () => {
-                    if (this.speechSynth.getVoices().length > 0) {
-                        loadVoicesHandler();
-                    } else {
-                        // Retry after a short delay
-                        setTimeout(tryLoadVoices, 100);
-                    }
-                };
-                
-                tryLoadVoices();
-                this.speechSynth.addEventListener('voiceschanged', loadVoicesHandler);
-            }
-            
-            startAudioReading() {
-                // Try ResponsiveVoice first for better Arabic pronunciation
-                if (this.tryResponsiveVoice()) {
-                    return;
-                }
-                
-                // Fallback to enhanced speech synthesis
-                this.speechSynth.cancel();
-                
-                const currentText = this.texts[this.currentLevel][this.currentTextIndex];
-                if (!currentText) return;
-                
-                this.words = currentText.content.split(' ');
-                this.audioWordIndex = 0;
-                this.isAudioReading = true;
-                this.wordTimings = [];
-                
-                this.elements.playAudioBtn.disabled = true;
-                this.elements.pauseAudioBtn.disabled = false;
-                this.elements.audioIndicator.classList.remove('hidden');
-                
-                this.speakTextEnhanced();
-            }
-            
-            tryResponsiveVoice() {
-                // Use ResponsiveVoice for better Arabic pronunciation if available
-                if (typeof responsiveVoice !== 'undefined' && responsiveVoice.voiceSupport()) {
-                    const currentText = this.texts[this.currentLevel][this.currentTextIndex];
-                    if (!currentText) return false;
-                    
-                    const options = {
-                        rate: parseFloat(this.elements.speedRange.value),
-                        pitch: parseFloat(this.elements.pitchRange.value),
-                        volume: parseFloat(this.elements.volumeRange.value),
-                        onstart: () => {
-                            this.isAudioReading = true;
-                            this.elements.playAudioBtn.disabled = true;
-                            this.elements.pauseAudioBtn.disabled = false;
-                            this.elements.audioIndicator.classList.remove('hidden');
-                            if (this.elements.highlightWords.checked) {
-                                this.startWordHighlighting();
-                            }
-                        },
-                        onend: () => {
-                            this.stopAudio();
-                        }
-                    };
-                    
-                    // Choose voice based on selection
-                    let voiceName = "Arabic Female";
-                    if (this.selectedVoice === 'arabic-male') {
-                        voiceName = "Arabic Male";
-                    }
-                    
-                    // Apply slow mode if enabled
-                    if (this.elements.slowMode.checked) {
-                        options.rate = Math.max(0.3, options.rate * 0.6);
-                    }
-                    
-                    responsiveVoice.speak(currentText.content, voiceName, options);
-                    return true;
-                }
-                return false;
-            }
-            
-            speakTextEnhanced() {
-                const currentText = this.texts[this.currentLevel][this.currentTextIndex];
-                if (!currentText || !this.isAudioReading) return;
-                
-                this.currentUtterance = new SpeechSynthesisUtterance(currentText.content);
-                
-                // Set voice - prefer Arabic voices
-                if (this.voices.length > 0) {
-                    const bestVoice = this.bestArabicVoice || this.voices.find(voice => 
-                        voice.lang.includes('ar') || voice.name.toLowerCase().includes('arabic')
-                    ) || this.voices[0];
-                    
-                    this.currentUtterance.voice = bestVoice;
-                    console.log('Using voice:', bestVoice.name, bestVoice.lang);
-                }
-                
-                // Set speech parameters
-                let rate = parseFloat(this.elements.speedRange.value);
-                if (this.elements.slowMode.checked) {
-                    rate = Math.max(0.3, rate * 0.6);
-                }
-                
-                this.currentUtterance.rate = rate;
-                this.currentUtterance.pitch = parseFloat(this.elements.pitchRange.value);
-                this.currentUtterance.volume = parseFloat(this.elements.volumeRange.value);
-                this.currentUtterance.lang = 'ar-SA'; // Force Arabic language
-                
-                // Highlight words during speech
-                if (this.elements.highlightWords.checked) {
-                    this.startWordHighlighting();
-                }
-                
-                this.currentUtterance.onend = () => {
-                    this.stopAudio();
-                };
-                
-                this.currentUtterance.onerror = (event) => {
-                    console.error('Speech synthesis error:', event);
-                    this.stopAudio();
-                };
-                
-                // Start speaking
-                this.speechSynth.speak(this.currentUtterance);
-            }
-            
-            startWordHighlighting() {
-                // Estimate word timing based on speech rate
-                const baseWordsPerSecond = 2.5;
-                const rate = this.elements.slowMode.checked ? 
-                    parseFloat(this.elements.speedRange.value) * 0.6 : 
-                    parseFloat(this.elements.speedRange.value);
-                const wordsPerSecond = baseWordsPerSecond * rate;
-                const wordInterval = 1000 / wordsPerSecond;
-                
-                this.audioWordIndex = 0;
-                this.audioTimer = setInterval(() => {
-                    if (this.audioWordIndex < this.words.length && this.isAudioReading) {
-                        this.highlightAudioWord(this.audioWordIndex);
-                        this.audioWordIndex++;
-                    } else {
-                        clearInterval(this.audioTimer);
-                    }
-                }, wordInterval);
-            }
-            
-            highlightAudioWord(wordIndex) {
-                const highlightedWords = this.words.map((word, index) => {
-                    if (index === wordIndex) {
-                        return `<span class="word-highlight">${word}</span>`;
-                    }
-                    return word;
-                });
-                
-                this.elements.readingText.innerHTML = highlightedWords.join(' ');
-                
-                // Auto scroll if enabled
-                if (this.elements.autoScroll.checked) {
-                    const highlightedElement = this.elements.readingText.querySelector('.word-highlight');
-                    if (highlightedElement) {
-                        highlightedElement.scrollIntoView({
-                            behavior: 'smooth',
-                            block: 'center'
-                        });
-                    }
-                }
-            }
-            
-            pauseAudio() {
-                this.isAudioReading = false;
-                
-                if (typeof responsiveVoice !== 'undefined') {
-                    responsiveVoice.pause();
-                } else {
-                    this.speechSynth.pause();
-                }
-                
-                clearInterval(this.audioTimer);
-                
-                this.elements.playAudioBtn.disabled = false;
-                this.elements.pauseAudioBtn.disabled = true;
-                this.elements.audioIndicator.classList.add('hidden');
-            }
-            
-            stopAudio() {
-                this.isAudioReading = false;
-                
-                if (typeof responsiveVoice !== 'undefined') {
-                    responsiveVoice.cancel();
-                } else {
-                    this.speechSynth.cancel();
-                }
-                
-                clearInterval(this.audioTimer);
-                this.audioWordIndex = 0;
-                
-                this.elements.playAudioBtn.disabled = false;
-                this.elements.pauseAudioBtn.disabled = true;
-                this.elements.audioIndicator.classList.add('hidden');
-                
-                // Remove highlighting
-                this.updateText();
-            }
-            
-            repeatCurrentSentence() {
-                // Find current sentence based on highlighted word
-                const currentText = this.texts[this.currentLevel][this.currentTextIndex];
-                if (!currentText) return;
-                
-                const sentences = currentText.content.split(/[.!?]/);
-                let currentSentence = sentences[0];
-                
-                // Simple sentence detection - could be enhanced
-                if (this.audioWordIndex > 0) {
-                    const wordsUpToCurrent = this.words.slice(0, this.audioWordIndex).join(' ');
-                    for (let i = 0; i < sentences.length; i++) {
-                        if (sentences[i].includes(wordsUpToCurrent.slice(-20))) {
-                            currentSentence = sentences[i];
-                            break;
-                        }
-                    }
-                }
-                
-                // Speak the current sentence
-                if (typeof responsiveVoice !== 'undefined') {
-                    const options = {
-                        rate: parseFloat(this.elements.speedRange.value),
-                        pitch: parseFloat(this.elements.pitchRange.value),
-                        volume: parseFloat(this.elements.volumeRange.value)
-                    };
-                    
-                    if (this.elements.slowMode.checked) {
-                        options.rate = Math.max(0.3, options.rate * 0.6);
-                    }
-                    
-                    responsiveVoice.speak(currentSentence, "Arabic Female", options);
-                } else {
-                    const utterance = new SpeechSynthesisUtterance(currentSentence);
-                    utterance.lang = 'ar-SA';
-                    utterance.rate = this.elements.slowMode.checked ? 
-                        parseFloat(this.elements.speedRange.value) * 0.6 : 
-                        parseFloat(this.elements.speedRange.value);
-                    utterance.pitch = parseFloat(this.elements.pitchRange.value);
-                    utterance.volume = parseFloat(this.elements.volumeRange.value);
-                    
-                    if (this.bestArabicVoice) {
-                        utterance.voice = this.bestArabicVoice;
-                    }
-                    
-                    this.speechSynth.speak(utterance);
-                }
-            }
-            
-            // Statistics and progress tracking
-            saveSession() {
-                const stats = this.getStats();
-                const minutes = this.elapsedTime / 60000;
-                const speed = minutes > 0 ? Math.round(this.currentWordIndex / minutes) : 0;
-                
-                stats.totalSessions++;
-                stats.totalWords += this.currentWordIndex;
-                stats.totalTime += Math.round(minutes);
-                stats.speeds.push(speed);
-                stats.bestSpeed = Math.max(stats.bestSpeed, speed);
-                
-                // Add to progress data for chart
-                this.progressData.push({
-                    date: new Date().toLocaleDateString('ar-SA'),
-                    speed: speed,
-                    words: this.currentWordIndex,
-                    level: this.currentLevel,
-                    accuracy: Math.min(100, Math.max(80, 100 - (this.elapsedTime / 1000 - this.currentWordIndex) * 2))
-                });
-                
-                // Keep only last 30 sessions
-                if (this.progressData.length > 30) {
-                    this.progressData = this.progressData.slice(-30);
-                }
-                
-                localStorage.setItem('readingStats', JSON.stringify(stats));
-                localStorage.setItem('progressData', JSON.stringify(this.progressData));
-                this.updateStatsDisplay();
-                this.updateChart();
-            }
-            
-            getStats() {
-                const defaultStats = {
-                    totalSessions: 0,
-                    totalWords: 0,
-                    totalTime: 0,
-                    speeds: [],
-                    bestSpeed: 0
-                };
-                
-                const saved = localStorage.getItem('readingStats');
-                return saved ? JSON.parse(saved) : defaultStats;
-            }
-            
-            loadStats() {
-                this.updateStatsDisplay();
-            }
-            
-            updateStatsDisplay() {
-                const stats = this.getStats();
-                const avgSpeed = stats.speeds.length > 0 
-                    ? Math.round(stats.speeds.reduce((a, b) => a + b, 0) / stats.speeds.length)
-                    : 0;
-                
-                this.elements.totalSessions.textContent = stats.totalSessions;
-                this.elements.totalWords.textContent = stats.totalWords.toLocaleString('ar-SA');
-                this.elements.totalTime.textContent = stats.totalTime + 'د';
-                this.elements.avgSpeed.textContent = avgSpeed;
-                this.elements.bestSpeed.textContent = stats.bestSpeed;
-                
-                // Update accuracy (simulated based on performance)
-                const accuracy = Math.min(100, Math.max(85, 95 + (avgSpeed - 100) * 0.1));
-                this.elements.accuracy.textContent = Math.round(accuracy) + '%';
-            }
-            
-            clearStats() {
-                if (confirm('هل أنت متأكد من مسح جميع الإحصائيات؟ لن يمكن استرداد هذه البيانات.')) {
-                    localStorage.removeItem('readingStats');
-                    localStorage.removeItem('progressData');
-                    this.progressData = [];
-                    this.updateStatsDisplay();
-                    this.updateChart();
-                    this.updateAchievements();
-                    alert('تم مسح جميع الإحصائيات بنجاح! 🗑️');
-                }
-            }
-            
-            // Encouragement system
-            updateEncouragement(type) {
-                const encouragements = this.encouragements[type];
-                const randomEncouragement = encouragements[Math.floor(Math.random() * encouragements.length)];
-                
-                this.elements.encouragementTitle.textContent = randomEncouragement.title;
-                this.elements.encouragementText.textContent = randomEncouragement.text;
-            }
-            
-            // Progress chart
-            initializeChart() {
-                const ctx = this.elements.progressChart.getContext('2d');
-                
-                this.chart = new Chart(ctx, {
-                    type: 'line',
-                    data: {
-                        labels: [],
-                        datasets: [{
-                            label: 'سرعة القراءة (كلمة/دقيقة)',
-                            data: [],
-                            borderColor: '#667eea',
-                            backgroundColor: 'rgba(102, 126, 234, 0.1)',
-                            borderWidth: 3,
-                            fill: true,
-                            tension: 0.4,
-                            pointBackgroundColor: '#667eea',
-                            pointBorderColor: '#ffffff',
-                            pointBorderWidth: 2,
-                            pointRadius: 6
-                        }]
-                    },
-                    options: {
-                        responsive: true,
-                        maintainAspectRatio: false,
-                        plugins: {
-                            legend: {
-                                labels: {
-                                    font: {
-                                        family: 'Cairo',
-                                        size: 14,
-                                        weight: 'bold'
-                                    }
-                                }
-                            }
-                        },
-                        scales: {
-                            y: {
-                                beginAtZero: true,
-                                title: {
-                                    display: true,
-                                    text: 'كلمة/دقيقة',
-                                    font: {
-                                        family: 'Cairo',
-                                        size: 12,
-                                        weight: 'bold'
-                                    }
-                                }
-                            },
-                            x: {
-                                title: {
-                                    display: true,
-                                    text: 'الجلسات',
-                                    font: {
-                                        family: 'Cairo',
-                                        size: 12,
-                                        weight: 'bold'
-                                    }
-                                }
-                            }
-                        }
-                    }
-                });
-                
-                this.updateChart();
-            }
-            
-            updateChart() {
-                if (!this.chart) return;
-                
-                const labels = this.progressData.map((_, index) => `جلسة ${index + 1}`);
-                const speeds = this.progressData.map(session => session.speed);
-                
-                this.chart.data.labels = labels;
-                this.chart.data.datasets[0].data = speeds;
-                this.chart.update();
-            }
-            
-            // Achievement system
-            updateAchievements() {
-                const stats = this.getStats();
-                const achievements = [];
-                
-                // Session-based achievements
-                if (stats.totalSessions >= 1) achievements.push({ icon: '🎯', title: 'أول خطوة', desc: 'أكملت جلستك الأولى' });
-                if (stats.totalSessions >= 5) achievements.push({ icon: '🔥', title: 'مثابر', desc: '5 جلسات مكتملة' });
-                if (stats.totalSessions >= 10) achievements.push({ icon: '💪', title: 'قوي الإرادة', desc: '10 جلسات مكتملة' });
-                if (stats.totalSessions >= 25) achievements.push({ icon: '🏆', title: 'بطل القراءة', desc: '25 جلسة مكتملة' });
-                
-                // Speed-based achievements
-                if (stats.bestSpeed >= 50) achievements.push({ icon: '⚡', title: 'سريع', desc: 'وصلت لـ 50 كلمة/دقيقة' });
-                if (stats.bestSpeed >= 100) achievements.push({ icon: '🚀', title: 'فائق السرعة', desc: 'وصلت لـ 100 كلمة/دقيقة' });
-                if (stats.bestSpeed >= 150) achievements.push({ icon: '⭐', title: 'نجم القراءة', desc: 'وصلت لـ 150 كلمة/دقيقة' });
-                
-                // Word-based achievements
-                if (stats.totalWords >= 100) achievements.push({ icon: '📚', title: 'قارئ نشط', desc: 'قرأت 100 كلمة' });
-                if (stats.totalWords >= 500) achievements.push({ icon: '🎓', title: 'طالب متميز', desc: 'قرأت 500 كلمة' });
-                if (stats.totalWords >= 1000) achievements.push({ icon: '👑', title: 'ملك القراءة', desc: 'قرأت 1000 كلمة' });
-                
-                // Time-based achievements
-                if (stats.totalTime >= 30) achievements.push({ icon: '⏰', title: 'مخصص للوقت', desc: '30 دقيقة من القراءة' });
-                if (stats.totalTime >= 60) achievements.push({ icon: '🕐', title: 'ساعة كاملة', desc: 'ساعة من القراءة' });
-                
-                this.displayAchievements(achievements);
-            }
-            
-            displayAchievements(achievements) {
-                this.elements.achievementBadges.innerHTML = '';
-                
-                if (achievements.length === 0) {
-                    this.elements.achievementBadges.innerHTML = '<p class="text-gray-500 text-center col-span-2">ابدأ القراءة لكسب الإنجازات! 🎯</p>';
-                    return;
-                }
-                
-                achievements.forEach(achievement => {
-                    const badge = document.createElement('div');
-                    badge.className = 'bg-gradient-to-r from-yellow-400 to-orange-500 text-white p-3 rounded-xl text-center transform hover:scale-105 transition-all';
-                    badge.innerHTML = `
-                        <div class="text-2xl mb-1">${achievement.icon}</div>
-                        <div class="font-bold text-sm">${achievement.title}</div>
-                        <div class="text-xs opacity-90">${achievement.desc}</div>
-                    `;
-                    this.elements.achievementBadges.appendChild(badge);
-                });
-            }
-        }
-        
-        // Initialize the platform when the page loads
-        document.addEventListener('DOMContentLoaded', () => {
-            new SmartReadingPlatform();
-        });
-    </script>
-<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'975ea950b13d3415',t:'MTc1NjMzMDEzNS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+    <!-- Load app logic -->
+    <script src="script.js"></script>
+</body>
 </html>
