@@ -1,0 +1,448 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>منصة القراءة الذكية - تطوير مهارات القراءة</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Noto+Sans+Arabic:wght@300;400;500;600;700;800&family=Cairo:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      font-family: 'Cairo','Noto Sans Arabic',sans-serif;
+      background: linear-gradient(135deg,#1e3a8a 0%,#1e40af 20%,#3b82f6 40%,#06b6d4 60%,#0891b2 80%,#1e3a8a 100%);
+      background-size: 300% 300%; animation: gradientShift 20s ease infinite;
+      min-height: 100vh; position: relative; overflow-x: hidden;
+    }
+    @keyframes gradientShift {0%{background-position:0% 50%}25%{background-position:100% 50%}50%{background-position:100% 100%}75%{background-position:0% 100%}100%{background-position:0% 50%}}
+    body::before {content:''; position:fixed; top:0; left:0; width:100%; height:100%;
+      background:
+        radial-gradient(circle at 25% 25%, rgba(255,255,255,0.15) 0%, transparent 50%),
+        radial-gradient(circle at 75% 75%, rgba(255,255,255,0.1) 0%, transparent 50%),
+        radial-gradient(circle at 50% 10%, rgba(102,126,234,0.2) 0%, transparent 40%),
+        radial-gradient(circle at 10% 90%, rgba(245,87,108,0.15) 0%, transparent 40%),
+        radial-gradient(circle at 90% 10%, rgba(79,172,254,0.15) 0%, transparent 40%),
+        linear-gradient(45deg, rgba(255,255,255,0.05) 0%, transparent 100%);
+      pointer-events:none; z-index:-1; animation: backgroundMove 30s ease-in-out infinite;
+    }
+    @keyframes backgroundMove {0%,100%{transform:translateX(0) translateY(0)}25%{transform:translateX(-20px) translateY(-10px)}50%{transform:translateX(20px) translateY(10px)}75%{transform:translateX(-10px) translateY(20px)}}
+    .glass-card { background:rgba(255,255,255,.95); backdrop-filter: blur(20px); border:2px solid rgba(255,255,255,.8);
+      box-shadow:0 20px 60px rgba(0,0,0,.15),0 8px 25px rgba(0,0,0,.1), inset 0 1px 0 rgba(255,255,255,.9); position:relative; overflow:hidden; }
+    .glass-card::before {content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,rgba(255,255,255,.4),transparent);}
+    .glass-card-dark { background:rgba(255,255,255,.08); backdrop-filter: blur(30px); border:1px solid rgba(255,255,255,.15);
+      box-shadow:0 20px 60px rgba(0,0,0,.3), inset 0 1px 0 rgba(255,255,255,.15); }
+    .reading-text { line-height:2.8; font-size:1.75rem; font-weight:600; color:#1f2937; text-shadow:0 1px 2px rgba(255,255,255,.8);
+      letter-spacing:1px; word-spacing:6px; font-family:'Amiri','Noto Sans Arabic',serif; text-align:justify; padding:2rem;
+      background:linear-gradient(135deg, rgba(255,255,255,.98), rgba(248,250,252,.95)); border-radius:15px; border:2px solid rgba(59,130,246,.2); }
+    .level-1{font-size:1.5rem; line-height:2.5;}
+    .level-2{font-size:1.65rem; line-height:2.6;}
+    .level-3{font-size:1.75rem; line-height:2.8;}
+    .level-4{font-size:1.85rem; line-height:3;}
+    .timer-circle{stroke-dasharray:283; stroke-dashoffset:283; transition:stroke-dashoffset 1s linear; filter: drop-shadow(0 0 12px rgba(59,130,246,.6));}
+    .timer-container{background:linear-gradient(145deg, rgba(255,255,255,.15), rgba(255,255,255,.08)); backdrop-filter: blur(30px); border:2px solid rgba(255,255,255,.2);
+      box-shadow:0 20px 60px rgba(0,0,0,.3),0 8px 30px rgba(79,70,229,.2), inset 0 2px 0 rgba(255,255,255,.3); position:relative; }
+    .timer-container::before{content:''; position:absolute; top:-2px; left:-2px; right:-2px; bottom:-2px; background:linear-gradient(45deg,#4f46e5,#7c3aed,#ec4899,#f59e0b);
+      border-radius:inherit; z-index:-1; opacity:.6; filter:blur(8px);}
+    .btn-gradient{background:linear-gradient(145deg,#4f46e5,#7c3aed,#ec4899); border:1px solid rgba(255,255,255,.2); position:relative; overflow:hidden; transition:all .4s cubic-bezier(.175,.885,.32,1.275);
+      box-shadow:0 10px 30px rgba(79,70,229,.4),0 4px 15px rgba(124,58,237,.3), inset 0 1px 0 rgba(255,255,255,.2); font-weight:700; transform: translateY(0) scale(1); backdrop-filter: blur(10px);}
+    .btn-gradient:hover{transform: translateY(-6px) scale(1.05); box-shadow:0 20px 50px rgba(79,70,229,.6),0 8px 25px rgba(124,58,237,.5), inset 0 1px 0 rgba(255,255,255,.3);
+      background:linear-gradient(145deg,#5b21b6,#be185d,#f59e0b);}
+    .btn-success{background:linear-gradient(145deg,#48bb78,#38a169); box-shadow:0 8px 25px rgba(72,187,120,.4);}
+    .btn-danger{background:linear-gradient(145deg,#f56565,#e53e3e); box-shadow:0 8px 25px rgba(245,101,101,.4);}
+    .btn-warning{background:linear-gradient(145deg,#ed8936,#dd6b20); box-shadow:0 8px 25px rgba(237,137,54,.4);}
+    .progress-bar{background:linear-gradient(90deg,#48bb78,#38a169,#2f855a); transition:width .5s ease; box-shadow:0 4px 15px rgba(72,187,120,.4); position:relative; overflow:hidden;}
+    .progress-bar::after{content:''; position:absolute; top:0; left:-100%; width:100%; height:100%; background:linear-gradient(90deg, transparent, rgba(255,255,255,.4), transparent); animation: progressShine 2s infinite;}
+    @keyframes progressShine {0%{left:-100%}100%{left:100%}}
+    .word-highlight{background:linear-gradient(120deg,#fbbf24,#f59e0b); padding:4px 12px; border-radius:12px; color:#1f2937; font-weight:800; text-shadow:0 1px 2px rgba(255,255,255,.8);
+      animation: wordPulse 1.2s infinite; box-shadow:0 4px 15px rgba(251,191,36,.6); border:2px solid rgba(245,158,11,.8);}
+    @keyframes wordPulse {0%,100%{transform:scale(1)}50%{transform:scale(1.08)}}
+    .level-badge {background:linear-gradient(145deg,#3b82f6,#1e40af); color:#fff; padding:8px 16px; border-radius:25px; font-weight:700; font-size:.9rem; box-shadow:0 4px 15px rgba(59,130,246,.4);}
+    .audio-quality-indicator{display:inline-flex; align-items:center; background:linear-gradient(145deg,#48bb78,#38a169); color:#fff; padding:4px 12px; border-radius:20px; font-size:.8rem; font-weight:bold; margin-right:10px;}
+    .audio-wave{display:inline-block; width:4px; height:20px; background:linear-gradient(to top,#48bb78,#38a169); margin:0 2px; border-radius:2px; animation: audioWave 1.5s ease-in-out infinite;}
+    .audio-wave:nth-child(2){animation-delay:.1s}.audio-wave:nth-child(3){animation-delay:.2s}.audio-wave:nth-child(4){animation-delay:.3s}.audio-wave:nth-child(5){animation-delay:.4s}
+    @keyframes audioWave{0%,100%{height:20px}50%{height:40px}}
+  </style>
+</head>
+<body>
+  <div class="container mx-auto px-4 py-8 max-w-7xl">
+    <div class="text-center mb-16 relative">
+      <div class="relative z-10 glass-card rounded-3xl p-8 mx-auto max-w-4xl">
+        <h1 class="text-7xl font-bold bg-gradient-to-r from-blue-600 via-indigo-700 to-purple-700 bg-clip-text text-transparent mb-6">📚 منصة القراءة الذكية</h1>
+        <p class="text-2xl text-gray-800 font-semibold mb-6 leading-relaxed">تطوير مهارات القراءة والفهم للمرحلتين الإعدادية والثانوية</p>
+        <div class="flex justify-center gap-4 flex-wrap">
+          <span class="level-badge">🎯 تعلم</span>
+          <span class="level-badge">📈 تطور</span>
+          <span class="level-badge">⭐ تميز</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- اختيار المستوى -->
+    <div class="glass-card rounded-3xl p-8 mb-8">
+      <h3 class="text-2xl font-bold text-gray-800 mb-4 text-center">🎓 اختر مستواك التعليمي</h3>
+      <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <div class="level-button active" data-level="1"><div class="text-center"><div class="text-3xl mb-2">🌱</div><div class="font-bold text-lg">المستوى الأول</div><div class="text-sm text-gray-600">للطلاب المبتدئين</div></div></div>
+        <div class="level-button" data-level="2"><div class="text-center"><div class="text-3xl mb-2">🌿</div><div class="font-bold text-lg">المستوى الثاني</div><div class="text-sm text-gray-600">للطلاب المتوسطين</div></div></div>
+        <div class="level-button" data-level="3"><div class="text-center"><div class="text-3xl mb-2">🌳</div><div class="font-bold text-lg">المستوى الثالث</div><div class="text-sm text-gray-600">للطلاب المتقدمين</div></div></div>
+        <div class="level-button" data-level="4"><div class="text-center"><div class="text-3xl mb-2">🏆</div><div class="font-bold text-lg">المستوى الرابع</div><div class="text-sm text-gray-600">للطلاب المتميزين</div></div></div>
+      </div>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+      <!-- منطقة القراءة -->
+      <div class="lg:col-span-2">
+        <div class="glass-card rounded-3xl p-8 mb-8">
+          <div class="flex justify-between items-center mb-6">
+            <h2 class="text-4xl font-bold text-gray-800">📖 نص القراءة</h2>
+            <div>
+              <select id="textSelect" class="px-6 py-3 rounded-xl border-2 border-purple-200 bg-white/90 backdrop-blur-sm font-medium text-lg">
+                <option value="0">النص الأول</option>
+                <option value="1">النص الثاني</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="glass-card-dark rounded-2xl mb-6">
+            <div id="readingText" class="reading-text level-1"></div>
+          </div>
+
+          <div class="flex flex-wrap justify-center gap-4 mb-6">
+            <button id="startBtn" class="btn-gradient text-white px-10 py-4 rounded-xl font-bold text-xl">🎯 ابدأ القراءة</button>
+            <button id="pauseBtn" class="btn-danger text-white px-10 py-4 rounded-xl font-bold text-xl" disabled>⏸️ توقف</button>
+            <button id="resetBtn" class="btn-warning text-white px-10 py-4 rounded-xl font-bold text-xl">🔄 إعادة تعيين</button>
+          </div>
+
+          <!-- القراءة الصوتية -->
+          <div class="glass-card-dark rounded-2xl p-6 mb-6">
+            <h4 class="text-2xl font-bold text-gray-800 mb-6 text-center">
+              🔊 القراءة الصوتية العربية الفصيحة
+              <span class="audio-quality-indicator">🎵 جودة عالية</span>
+              <div id="audioIndicator" class="hidden mt-2">
+                <span class="audio-wave"></span><span class="audio-wave"></span><span class="audio-wave"></span><span class="audio-wave"></span><span class="audio-wave"></span>
+              </div>
+            </h4>
+
+            <div class="flex flex-wrap justify-center gap-4 mb-6">
+              <button id="testAudioBtn" class="bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white px-6 py-3 rounded-xl font-bold text-lg transform hover:scale-105 transition-all">🔊 اختبار الصوت</button>
+              <button id="playAudioBtn" class="btn-success text-white px-8 py-3 rounded-xl font-bold text-lg">▶️ تشغيل الصوت العربي</button>
+              <button id="pauseAudioBtn" class="btn-danger text-white px-8 py-3 rounded-xl font-bold text-lg" disabled>⏸️ إيقاف مؤقت</button>
+              <button id="stopAudioBtn" class="btn-warning text-white px-8 py-3 rounded-xl font-bold text-lg">⏹️ إيقاف تام</button>
+              <button id="repeatAudioBtn" class="btn-gradient text-white px-8 py-3 rounded-xl font-bold text-lg">🔄 إعادة الجملة</button>
+            </div>
+
+            <!-- عنصر مشغّل الصوت الفعلي -->
+            <audio id="audioPlayer" preload="auto" class="hidden"></audio>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+              <div class="text-center">
+                <label class="block text-lg font-bold text-gray-700 mb-3">سرعة القراءة</label>
+                <input type="range" id="speedRange" min="0.3" max="1.5" step="0.1" value="0.8" class="w-full h-3 bg-gradient-to-r from-blue-200 to-purple-200 rounded-lg appearance-none cursor-pointer">
+                <span id="speedValue" class="text-lg font-bold text-gray-600">0.8x</span>
+              </div>
+              <div class="text-center">
+                <label class="block text-lg font-bold text-gray-700 mb-3">درجة الصوت</label>
+                <input type="range" id="pitchRange" min="0.8" max="1.3" step="0.1" value="1" class="w-full h-3 bg-gradient-to-r from-green-200 to-blue-200 rounded-lg appearance-none cursor-pointer">
+                <span id="pitchValue" class="text-lg font-bold text-gray-600">1.0</span>
+              </div>
+              <div class="text-center">
+                <label class="block text-lg font-bold text-gray-700 mb-3">مستوى الصوت</label>
+                <input type="range" id="volumeRange" min="0.5" max="1" step="0.1" value="1" class="w-full h-3 bg-gradient-to-r from-yellow-200 to-red-200 rounded-lg appearance-none cursor-pointer">
+                <span id="volumeValue" class="text-lg font-bold text-gray-600">100%</span>
+              </div>
+            </div>
+
+            <div class="flex flex-wrap justify-center gap-6 mb-4">
+              <label class="flex items-center bg-white/60 px-4 py-2 rounded-xl">
+                <input type="checkbox" id="highlightWords" checked class="mr-3 w-5 h-5 rounded">
+                <span class="text-lg font-medium text-gray-700">تمييز الكلمات أثناء القراءة</span>
+              </label>
+              <label class="flex items-center bg-white/60 px-4 py-2 rounded-xl">
+                <input type="checkbox" id="autoScroll" checked class="mr-3 w-5 h-5 rounded">
+                <span class="text-lg font-medium text-gray-700">التمرير التلقائي</span>
+              </label>
+              <label class="flex items-center bg-white/60 px-4 py-2 rounded-xl">
+                <input type="checkbox" id="slowMode" class="mr-3 w-5 h-5 rounded">
+                <span class="text-lg font-medium text-gray-700">الوضع البطيء للمبتدئين</span>
+              </label>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- عمود جانبي مختصر -->
+      <div class="space-y-8">
+        <div class="glass-card rounded-3xl p-8 text-center">
+          <h3 class="text-3xl font-bold text-gray-800 mb-6">⏱️ المؤقت</h3>
+          <div class="timer-container rounded-full w-56 h-56 mx-auto flex items-center justify-center relative">
+            <svg class="w-52 h-52 transform -rotate-90 absolute">
+              <circle cx="104" cy="104" r="50" stroke="#e5e7eb" stroke-width="10" fill="none"></circle>
+              <circle id="timerCircle" class="timer-circle" cx="104" cy="104" r="50" stroke="#667eea" stroke-width="10" fill="none"></circle>
+            </svg>
+            <div class="text-center z-10">
+              <div id="timerDisplay" class="text-5xl font-bold text-gray-800">00:00</div>
+              <div class="text-lg text-gray-600 mt-2 font-medium">دقيقة:ثانية</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="glass-card rounded-3xl p-8">
+          <h3 class="text-2xl font-bold text-gray-800 mb-6">📈 إحصائياتك</h3>
+          <div class="space-y-4">
+            <div class="flex justify-between items-center p-4 bg-gradient-to-r from-blue-50 to-blue-100 rounded-xl">
+              <span class="font-bold text-gray-700">إجمالي الجلسات</span>
+              <span id="totalSessions" class="text-3xl font-bold text-blue-600">0</span>
+            </div>
+            <div class="flex justify-between items-center p-4 bg-gradient-to-r from-green-50 to-green-100 rounded-xl">
+              <span class="font-bold text-gray-700">إجمالي الكلمات</span>
+              <span id="totalWords" class="text-3xl font-bold text-green-600">0</span>
+            </div>
+            <div class="flex justify-between items-center p-4 bg-gradient-to-r from-purple-50 to-purple-100 rounded-xl">
+              <span class="font-bold text-gray-700">متوسط السرعة</span>
+              <span id="avgSpeed" class="text-3xl font-bold text-purple-600">0</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+<script>
+class SmartReadingPlatform {
+  constructor() {
+    // نصوص مختصرة (استبدلها بنصوصك الأصلية إن أردت)
+    this.texts = {
+      1: [
+        { title: "الطائر الصغير", content: "كان هناك طائر صغير يعيش في غابة جميلة. كان الطائر يحب الغناء كل صباح." },
+        { title: "الفلاح الطيب", content: "كان الفلاح يزرع الخضروات ويعتني بها كل يوم حتى يحصد ثمارها." }
+      ],
+      2: [
+        { title: "رحلة الاكتشاف", content: "انطلقت مجموعة من الطلاب إلى المتحف العلمي لرؤية الهياكل العظمية للديناصورات." },
+        { title: "عالم الفضاء الشاب", content: "يحلم أحمد بأن يصبح عالم فضاء ويراقب القمر بالمنظار ليلاً." }
+      ],
+      3: [
+        { title: "التكنولوجيا والتعليم", content: "أصبحت الفصول الذكية والتعلم الإلكتروني جزءاً مهماً من التعليم." },
+        { title: "الطاقة المتجددة", content: "تقلل الطاقة الشمسية وطاقة الرياح من الانبعاثات الكربونية وتحافظ على البيئة." }
+      ],
+      4: [
+        { title: "الذكاء الاصطناعي", content: "يمثل الذكاء الاصطناعي نقلة نوعية في التكنولوجيا ويثير أسئلة أخلاقية." },
+        { title: "الحضارة الإسلامية", content: "أسهم العلماء المسلمون في الطب والفلك والرياضيات عبر التاريخ." }
+      ]
+    };
+
+    // ربط ملفات MP3 كما هي بأسماءها في الريبو (الجذر)
+    // ملاحظة: أضفّت بديلًا للاسم الذي فيه مسافة/أقواس عبر encodeURI تلقائياً في التشغيل.
+    this.audioMap = {
+      1: { 0: 'luvvoice.com-20250829-FYw1f1.mp3', 1: 'luvvoice.com-20250829-GbpwvG.mp3' },
+      2: { 0: 'luvvoice.com-20250829-lDPtdq.mp3', 1: 'luvvoice.com-20250829-IN0xMU.mp3' },
+      3: { 0: 'luvvoice.com-20250829-nngwau.mp3', 1: 'luvvoice.com-20250829-zYDQwp.mp3' },
+      4: { 0: 'luvvoice.com-20250829-Wu9epC.mp3', 1: 'luvvoice.com-20250829-Nk4JdQ.mp3' }
+    };
+
+    // عناصر
+    this.el = {
+      levelButtons: document.querySelectorAll('.level-button'),
+      textSelect: document.getElementById('textSelect'),
+      readingText: document.getElementById('readingText'),
+      startBtn: document.getElementById('startBtn'),
+      pauseBtn: document.getElementById('pauseBtn'),
+      resetBtn: document.getElementById('resetBtn'),
+      timerDisplay: document.getElementById('timerDisplay'),
+      timerCircle: document.getElementById('timerCircle'),
+      audio: document.getElementById('audioPlayer'),
+      testBtn: document.getElementById('testAudioBtn'),
+      playBtn: document.getElementById('playAudioBtn'),
+      pauseAudioBtn: document.getElementById('pauseAudioBtn'),
+      stopAudioBtn: document.getElementById('stopAudioBtn'),
+      repeatAudioBtn: document.getElementById('repeatAudioBtn'),
+      speedRange: document.getElementById('speedRange'),
+      pitchRange: document.getElementById('pitchRange'),
+      volumeRange: document.getElementById('volumeRange'),
+      highlightWords: document.getElementById('highlightWords'),
+      autoScroll: document.getElementById('autoScroll'),
+      slowMode: document.getElementById('slowMode'),
+      audioIndicator: document.getElementById('audioIndicator')
+    };
+
+    // الحالة
+    this.currentLevel = 1;
+    this.currentTextIndex = 0;
+    this.words = [];
+    this.audioTimer = null;
+    this.synth = window.speechSynthesis;
+
+    this.initialize();
+  }
+
+  initialize() {
+    this.updateTextOptions();
+    this.updateText();
+
+    // اختيار المستوى
+    this.el.levelButtons.forEach((btn, index) => {
+      btn.addEventListener('click', () => {
+        this.currentLevel = index + 1;
+        this.el.levelButtons.forEach((b, i) => b.classList.toggle('active', i === index));
+        this.currentTextIndex = 0;
+        this.el.textSelect.value = 0;
+        this.updateTextOptions();
+        this.updateText();
+        this.stopAudio();
+      });
+    });
+
+    // اختيار النص
+    this.el.textSelect.addEventListener('change', () => {
+      this.currentTextIndex = parseInt(this.el.textSelect.value);
+      this.updateText();
+      this.stopAudio();
+    });
+
+    // أزرار الصوت
+    this.el.testBtn.addEventListener('click', () => this.testVoice());
+    this.el.playBtn.addEventListener('click', () => this.playAudioOrTTS());
+    this.el.pauseAudioBtn.addEventListener('click', () => this.pauseAudio());
+    this.el.stopAudioBtn.addEventListener('click', () => this.stopAudio());
+    this.el.repeatAudioBtn.addEventListener('click', () => this.repeatSentence());
+
+    // تحديث الملصقات
+    this.el.speedRange.addEventListener('input', e => document.getElementById('speedValue').textContent = e.target.value + 'x');
+    this.el.pitchRange.addEventListener('input', e => document.getElementById('pitchValue').textContent = e.target.value);
+    this.el.volumeRange.addEventListener('input', e => document.getElementById('volumeValue').textContent = Math.round(e.target.value*100) + '%');
+  }
+
+  updateTextOptions() {
+    const list = this.texts[this.currentLevel];
+    this.el.textSelect.innerHTML = '';
+    list.forEach((t, i) => {
+      const op = document.createElement('option');
+      op.value = i; op.textContent = t.title;
+      this.el.textSelect.appendChild(op);
+    });
+  }
+
+  updateText() {
+    const t = this.texts[this.currentLevel][this.currentTextIndex];
+    this.words = t.content.split(' ');
+    this.el.readingText.textContent = t.content;
+    this.el.readingText.className = `reading-text level-${this.currentLevel}`;
+  }
+
+  // تشغيل MP3 أولاً، وإن تعذّر فـ TTS
+  playAudioOrTTS() {
+    const src = this.audioMap?.[this.currentLevel]?.[this.currentTextIndex];
+    const rateUI = parseFloat(this.el.speedRange.value || '0.8');
+    const rate = this.el.slowMode.checked ? Math.max(0.3, rateUI * 0.5) : rateUI;
+
+    if (src) {
+      const candidates = [src, encodeURI(src), 'audio/' + src];
+      this.tryPlay(candidates, rate);
+    } else {
+      this.speakTTS(rate);
+    }
+  }
+
+  tryPlay(list, rate, i=0) {
+    if (i >= list.length) {
+      alert('تعذّر تشغيل ملف الصوت. سيتم استخدام القراءة الآلية.');
+      return this.speakTTS(rate);
+    }
+    this.el.audio.src = list[i];
+    this.el.audio.volume = parseFloat(this.el.volumeRange.value || '1');
+    this.el.audio.onplay  = () => { this.toggleAudioUI(true);  this.startHighlight(rate); };
+    this.el.audio.onended = () => { this.toggleAudioUI(false); this.stopHighlight(); };
+    this.el.audio.onerror = () => this.tryPlay(list, rate, i+1);
+    this.el.audio.play().catch(() => alert('المتصفح يحتاج نقرة لتشغيل الصوت. اضغط تشغيل مرة أخرى.'));
+  }
+
+  speakTTS(rate) {
+    const text = this.texts[this.currentLevel][this.currentTextIndex].content;
+    const u = new SpeechSynthesisUtterance(text);
+    u.lang = 'ar-SA'; u.rate = rate;
+    u.pitch = parseFloat(this.el.pitchRange.value || '1');
+    u.volume = parseFloat(this.el.volumeRange.value || '1');
+    const voices = this.synth.getVoices();
+    const pick = voices.find(v => /ar/i.test(v.lang) || /arabic/i.test(v.name));
+    if (pick) u.voice = pick;
+    u.onstart = () => { this.toggleAudioUI(true); this.startHighlight(rate); };
+    u.onend   = () => { this.toggleAudioUI(false); this.stopHighlight(); };
+    u.onerror = () => { this.toggleAudioUI(false); this.stopHighlight(); alert('تعذّر تشغيل النطق الآلي.'); };
+    if (!voices.length) {
+      this.synth.onvoiceschanged = () => this.synth.speak(u);
+      setTimeout(() => this.synth.speak(u), 400);
+    } else {
+      this.synth.speak(u);
+    }
+  }
+
+  pauseAudio() {
+    if (!this.el.audio.paused && !this.el.audio.ended) { this.el.audio.pause(); this.stopHighlight(); this.toggleAudioUI(false); return; }
+    if (this.synth.speaking) this.synth.pause();
+    this.toggleAudioUI(false);
+  }
+
+  stopAudio() {
+    if (!this.el.audio.paused) { this.el.audio.pause(); this.el.audio.currentTime = 0; }
+    if (this.synth.speaking) this.synth.cancel();
+    this.toggleAudioUI(false);
+    this.stopHighlight();
+  }
+
+  repeatSentence() {
+    const t = this.texts[this.currentLevel][this.currentTextIndex].content;
+    const s = t.split(/[.!؟\u061F]/).map(x=>x.trim()).filter(Boolean).pop() || t;
+    const u = new SpeechSynthesisUtterance(s);
+    u.lang = 'ar-SA';
+    u.rate = parseFloat(this.el.speedRange.value || '0.8');
+    u.pitch = parseFloat(this.el.pitchRange.value || '1');
+    u.volume = parseFloat(this.el.volumeRange.value || '1');
+    const voices = this.synth.getVoices();
+    const pick = voices.find(v => /ar/i.test(v.lang) || /arabic/i.test(v.name));
+    if (pick) u.voice = pick;
+    this.synth.speak(u);
+  }
+
+  toggleAudioUI(isPlaying) {
+    this.el.playBtn.disabled = isPlaying;
+    this.el.pauseAudioBtn.disabled = !isPlaying;
+    this.el.audioIndicator.classList.toggle('hidden', !isPlaying);
+  }
+
+  // تمييز الكلمات تقديريًا
+  startHighlight(rate) {
+    if (!this.el.highlightWords.checked) return;
+    const baseWps = 2.5;
+    const eff = this.el.slowMode.checked ? Math.max(0.3, rate*0.5) : rate;
+    const interval = Math.max(120, 1000/(baseWps*eff));
+    const text = this.texts[this.currentLevel][this.currentTextIndex].content;
+    const words = text.split(' ');
+    let i = 0;
+    clearInterval(this.audioTimer);
+    this.audioTimer = setInterval(() => {
+      this.el.readingText.innerHTML = words.map((w,idx)=> idx===i?`<span class="word-highlight">${w}</span>`:w).join(' ');
+      if (this.el.autoScroll.checked) {
+        const el = this.el.readingText.querySelector('.word-highlight');
+        if (el) el.scrollIntoView({behavior:'smooth', block:'center'});
+      }
+      i++; if (i>=words.length) this.stopHighlight();
+    }, interval);
+  }
+  stopHighlight() {
+    clearInterval(this.audioTimer);
+    this.el.readingText.textContent = this.texts[this.currentLevel][this.currentTextIndex].content;
+  }
+
+  testVoice() {
+    const u = new SpeechSynthesisUtterance('مرحباً، هذا اختبار للصوت العربي.');
+    u.lang='ar-SA'; u.rate=0.9; u.pitch=1.0; u.volume=1.0;
+    const voices = this.synth.getVoices();
+    const pick = voices.find(v => /ar/i.test(v.lang) || /arabic/i.test(v.name));
+    if (pick) u.voice = pick;
+    this.synth.speak(u);
+  }
+}
+
+document.addEventListener('DOMContentLoaded', () => new SmartReadingPlatform());
+</script>
+</body>
+</html>
